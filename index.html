@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دفتر مصاريف البيت العائلي</title>
+    <!-- Chart.js للرسوم البيانية -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS لتصدير ملفات الإكسيل -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #1F4E79;
+            --primary-light: #2F5597;
+            --accent: #28a745;
+            --bg: #F4F7F9;
+            --card-bg: #FFFFFF;
+            --text: #333333;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white; padding: 20px; border-radius: 16px;
+            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 16px;
+        }
+        .header h1 { margin: 0; font-size: 1.6rem; }
+        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 0.9rem; }
+
+        .card {
+            background: var(--card-bg); padding: 18px; border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+        }
+
+        .card-title { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.88rem; }
+        input, select, textarea {
+            width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB;
+            border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(31,78,121,0.15); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .btn {
+            background-color: var(--primary); color: white; border: none; padding: 12px;
+            border-radius: 8px; font-weight: bold; font-size: 1rem; width: 100%; cursor: pointer; transition: 0.2s;
+        }
+        .btn:hover { background-color: var(--primary-light); }
+        .btn-excel { background-color: #1D6F42; margin-top: 8px; }
+        .btn-excel:hover { background-color: #155231; }
+
+        .kpi-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+        .kpi-box { background: var(--card-bg); padding: 12px; border-radius: 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .kpi-title { font-size: 0.75rem; color: #6B7280; font-weight: bold; }
+        .kpi-value { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-top: 4px; }
+
+        .filter-box { background: #EBF3FA; border: 1px solid #BDD7EE; padding: 12px; border-radius: 10px; margin-bottom: 16px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #E5E7EB; }
+        th { background-color: #F3F4F6; color: var(--primary); }
+        .delete-btn { color: #DC2626; cursor: pointer; border: none; background: none; font-weight: bold; }
+
+        .chart-container { position: relative; height: 260px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🏡 دفتر مصاريف البيت العائلي</h1>
+        <p>متابعة وتلخيص المصاريف الشهرية بين الزوجين</p>
+    </div>
+
+    <!-- فلتر تحديد الشهر -->
+    <div class="filter-box">
+        <div class="grid-2" style="align-items: center;">
+            <label for="filterMonth" style="margin:0;">📅 اختر الشهر المُراد تحليله:</label>
+            <select id="filterMonth" onchange="updateDashboard()">
+                <option value="الكل">عرض كل الشهور</option>
+                <option value="يناير">يناير</option>
+                <option value="فبراير">فبراير</option>
+                <option value="مارس">مارس</option>
+                <option value="أبريل">أبريل</option>
+                <option value="مايو">مايو</option>
+                <option value="يونيو">يونيو</option>
+                <option value="يوليو">يوليو</option>
+                <option value="أغسطس">أغسطس</option>
+                <option value="سبتمبر" selected>سبتمبر</option>
+                <option value="أكتوبر">أكتوبر</option>
+                <option value="نوفمبر">نوفمبر</option>
+                <option value="ديسمبر">ديسمبر</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- كروت إحصائيات الشهر -->
+    <div class="kpi-container">
+        <div class="kpi-box">
+            <div class="kpi-title">إجمالي الشهر</div>
+            <div class="kpi-value" id="kpiTotal">0 ج.م</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-title">دفع الزوج</div>
+            <div class="kpi-value" id="kpiHusband">0 ج.م</div>
+        </div>
+        <div class="kpi-box">
+            <div class="kpi-title">دفعت الزوجة</div>
+            <div class="kpi-value" id="kpiWife">0 ج.م</div>
+        </div>
+    </div>
+
+    <!-- رسم بياني / هيستوجرام -->
+    <div class="card">
+        <div class="card-title">📊 هيستوجرام المصاريف حسب القسم</div>
+        <div class="chart-container">
+            <canvas id="expenseChart"></canvas>
+        </div>
+    </div>
+
+    <!-- نموذج إضافة مصروف جديد -->
+    <div class="card">
+        <div class="card-title">➕ تسجيل مشتريات جديدة</div>
+        <form id="expenseForm" onsubmit="addExpense(event)">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>التاريخ:</label>
+                    <input type="date" id="dateInput" required>
+                </div>
+                <div class="form-group">
+                    <label>الشهر:</label>
+                    <select id="monthInput" required>
+                        <option value="يناير">يناير</option>
+                        <option value="فبراير">فبراير</option>
+                        <option value="مارس">مارس</option>
+                        <option value="أبريل">أبريل</option>
+                        <option value="مايو">مايو</option>
+                        <option value="يونيو">يونيو</option>
+                        <option value="يوليو">يوليو</option>
+                        <option value="أغسطس">أغسطس</option>
+                        <option value="سبتمبر" selected>سبتمبر</option>
+                        <option value="أكتوبر">أكتوبر</option>
+                        <option value="نوفمبر">نوفمبر</option>
+                        <option value="ديسمبر">ديسمبر</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>القسم / الفئة:</label>
+                    <select id="categoryInput" required>
+                        <option value="منظفات">منظفات</option>
+                        <option value="لحوم">لحوم</option>
+                        <option value="خضروات">خضروات</option>
+                        <option value="فواكه">فواكه</option>
+                        <option value="ورقيات">ورقيات</option>
+                        <option value="بهارات">بهارات</option>
+                        <option value="خزين مطبخ">خزين مطبخ</option>
+                        <option value="مستلزمات للفطار">مستلزمات للفطار</option>
+                        <option value="أخرى">أخرى</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>مين دفع؟</label>
+                    <select id="buyerInput" required>
+                        <option value="الزوج">الزوج</option>
+                        <option value="الزوجة">الزوجة</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>السلعة / البيان:</label>
+                    <input type="text" id="itemInput" placeholder="مثال: 2 كيلو لحم" required>
+                </div>
+                <div class="form-group">
+                    <label>المبلغ (ج.م):</label>
+                    <input type="number" id="amountInput" step="0.5" placeholder="0.00" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">💾 حفظ المصروف</button>
+        </form>
+    </div>
+
+    <!-- جدول المشتريات وأزرار الإكسيل -->
+    <div class="card">
+        <div class="card-title">
+            <span>📋 سجل المشتريات المسجلة</span>
+        </div>
+        
+        <button class="btn btn-excel" onclick="exportToExcel()">📊 تحميل شيت الإكسيل (.xlsx) دورياً</button>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>القسم</th>
+                        <th>السلعة</th>
+                        <th>المشتري</th>
+                        <th>المبلغ</th>
+                        <th>حذف</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تعيين تاريخ اليوم تلقائياً
+    document.getElementById('dateInput').valueAsDate = new Date();
+
+    const categories = ["منظفات", "لحوم", "خضروات", "فواكه", "ورقيات", "بهارات", "خزين مطبخ", "مستلزمات للفطار", "أخرى"];
+
+    // البيانات الأولية للتجربة
+    let expenses = JSON.parse(localStorage.getItem('home_expenses')) || [
+        { date: '2026-09-01', month: 'سبتمبر', category: 'لحوم', item: '2 كيلو لحم بقر', buyer: 'الزوج', amount: 700 },
+        { date: '2026-09-02', month: 'سبتمبر', category: 'خضروات', item: 'طماطم وبطاطس', buyer: 'الزوجة', amount: 180 },
+        { date: '2026-09-03', month: 'سبتمبر', category: 'منظفات', item: 'مسحوق غسيل', buyer: 'الزوج', amount: 320 },
+        { date: '2026-09-04', month: 'سبتمبر', category: 'مستلزمات للفطار', item: 'جبن ورومي وبيض', buyer: 'الزوجة', amount: 250 },
+        { date: '2026-09-05', month: 'سبتمبر', category: 'فواكه', item: 'مانجو وتفاح', buyer: 'الزوج', amount: 210 }
+    ];
+
+    let chartInstance = null;
+
+    function saveExpenses() {
+        localStorage.setItem('home_expenses', JSON.stringify(expenses));
+    }
+
+    function addExpense(e) {
+        e.preventDefault();
+        const newExpense = {
+            date: document.getElementById('dateInput').value,
+            month: document.getElementById('monthInput').value,
+            category: document.getElementById('categoryInput').value,
+            item: document.getElementById('itemInput').value,
+            buyer: document.getElementById('buyerInput').value,
+            amount: parseFloat(document.getElementById('amountInput').value)
+        };
+
+        expenses.push(newExpense);
+        saveExpenses();
+        
+        // إعادة تصفية الفلتر لشهر العنصر المضاف لرؤيته مباشرة
+        document.getElementById('filterMonth').value = newExpense.month;
+        
+        document.getElementById('itemInput').value = '';
+        document.getElementById('amountInput').value = '';
+        
+        updateDashboard();
+    }
+
+    function deleteExpense(index) {
+        if(confirm('هل انت أصلك عايز تحذف السجل ده؟')) {
+            expenses.splice(index, 1);
+            saveExpenses();
+            updateDashboard();
+        }
+    }
+
+    function updateDashboard() {
+        const selectedMonth = document.getElementById('filterMonth').value;
+        const filteredData = selectedMonth === 'الكل' ? expenses : expenses.filter(x => x.month === selectedMonth);
+
+        // حساب الإحصائيات
+        let total = 0, husband = 0, wife = 0;
+        const catTotals = {};
+        categories.forEach(c => catTotals[c] = 0);
+
+        filteredData.forEach(item => {
+            total += item.amount;
+            if(item.buyer === 'الزوج') husband += item.amount;
+            if(item.buyer === 'الزوجة') wife += item.amount;
+            if(catTotals[item.category] !== undefined) {
+                catTotals[item.category] += item.amount;
+            } else {
+                catTotals[item.category] = item.amount;
+            }
+        });
+
+        document.getElementById('kpiTotal').innerText = total.toLocaleString() + ' ج.م';
+        document.getElementById('kpiHusband').innerText = husband.toLocaleString() + ' ج.م';
+        document.getElementById('kpiWife').innerText = wife.toLocaleString() + ' ج.م';
+
+        // تحديث الجدول
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        filteredData.forEach((item) => {
+            const realIndex = expenses.indexOf(item);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.date}</td>
+                <td>${item.category}</td>
+                <td>${item.item}</td>
+                <td>${item.buyer}</td>
+                <td><b>${item.amount} ج.م</b></td>
+                <td><button class="delete-btn" onclick="deleteExpense(${realIndex})">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // تحديث الرسم البياني (Histogram)
+        renderChart(catTotals);
+    }
+
+    function renderChart(catTotals) {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        const dataValues = categories.map(c => catTotals[c]);
+
+        if(chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'إجمالي المصاريف (جنية)',
+                    data: dataValues,
+                    backgroundColor: '#1F4E79',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // تصدير البيانات إلى شيت إكسيل رسمي (.xlsx)
+    function exportToExcel() {
+        const dataToExport = expenses.map((x, idx) => ({
+            "م": idx + 1,
+            "التاريخ": x.date,
+            "الشهر": x.month,
+            "القسم": x.category,
+            "السلعة / البيان": x.item,
+            "المشتري": x.buyer,
+            "المبلغ (ج.م)": x.amount
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "سجل المصاريف");
+
+        // اتجاه الشيت من اليمين للشمال
+        if(!workbook.Workbook) workbook.Workbook = {};
+        if(!workbook.Workbook.Views) workbook.Workbook.Views = [{}];
+        workbook.Workbook.Views[0].RTL = true;
+
+        XLSX.writeFile(workbook, `مصاريف_البيت_العائلية_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    // التشغيل عند الفتح
+    updateDashboard();
+</script>
+</body>
+</html>
