@@ -3,374 +3,952 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دفتر مصاريف البيت العائلي</title>
-    <!-- Chart.js للرسوم البيانية -->
+    <title>بيت أحمد وأسماء - دفتر المصاريف</title>
+    
+    <!-- Google Fonts - Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS لتصدير ملفات الإكسيل -->
+
+    <!-- SheetJS (xlsx) for Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <style>
-        :root {
-            --primary: #1F4E79;
-            --primary-light: #2F5597;
-            --accent: #28a745;
-            --bg: #F4F7F9;
-            --card-bg: #FFFFFF;
-            --text: #333333;
-        }
 
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; }
-
-        .container { max-width: 800px; margin: 0 auto; }
-
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white; padding: 20px; border-radius: 16px;
-            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 16px;
-        }
-        .header h1 { margin: 0; font-size: 1.6rem; }
-        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 0.9rem; }
-
-        .card {
-            background: var(--card-bg); padding: 18px; border-radius: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
-        }
-
-        .card-title { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
-
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.88rem; }
-        input, select, textarea {
-            width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB;
-            border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.2s;
-        }
-        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(31,78,121,0.15); }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        .btn {
-            background-color: var(--primary); color: white; border: none; padding: 12px;
-            border-radius: 8px; font-weight: bold; font-size: 1rem; width: 100%; cursor: pointer; transition: 0.2s;
-        }
-        .btn:hover { background-color: var(--primary-light); }
-        .btn-excel { background-color: #1D6F42; margin-top: 8px; }
-        .btn-excel:hover { background-color: #155231; }
-
-        .kpi-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-        .kpi-box { background: var(--card-bg); padding: 12px; border-radius: 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .kpi-title { font-size: 0.75rem; color: #6B7280; font-weight: bold; }
-        .kpi-value { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-top: 4px; }
-
-        .filter-box { background: #EBF3FA; border: 1px solid #BDD7EE; padding: 12px; border-radius: 10px; margin-bottom: 16px; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #E5E7EB; }
-        th { background-color: #F3F4F6; color: var(--primary); }
-        .delete-btn { color: #DC2626; cursor: pointer; border: none; background: none; font-weight: bold; }
-
-        .chart-container { position: relative; height: 260px; width: 100%; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="header">
-        <h1>🏡 دفتر مصاريف البيت العائلي</h1>
-        <p>متابعة وتلخيص المصاريف الشهرية بين الزوجين</p>
-    </div>
-
-    <!-- فلتر تحديد الشهر -->
-    <div class="filter-box">
-        <div class="grid-2" style="align-items: center;">
-            <label for="filterMonth" style="margin:0;">📅 اختر الشهر المُراد تحليله:</label>
-            <select id="filterMonth" onchange="updateDashboard()">
-                <option value="الكل">عرض كل الشهور</option>
-                <option value="يناير">يناير</option>
-                <option value="فبراير">فبراير</option>
-                <option value="مارس">مارس</option>
-                <option value="أبريل">أبريل</option>
-                <option value="مايو">مايو</option>
-                <option value="يونيو">يونيو</option>
-                <option value="يوليو">يوليو</option>
-                <option value="أغسطس">أغسطس</option>
-                <option value="سبتمبر" selected>سبتمبر</option>
-                <option value="أكتوبر">أكتوبر</option>
-                <option value="نوفمبر">نوفمبر</option>
-                <option value="ديسمبر">ديسمبر</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- كروت إحصائيات الشهر -->
-    <div class="kpi-container">
-        <div class="kpi-box">
-            <div class="kpi-title">إجمالي الشهر</div>
-            <div class="kpi-value" id="kpiTotal">0 ج.م</div>
-        </div>
-        <div class="kpi-box">
-            <div class="kpi-title">دفع الزوج</div>
-            <div class="kpi-value" id="kpiHusband">0 ج.م</div>
-        </div>
-        <div class="kpi-box">
-            <div class="kpi-title">دفعت الزوجة</div>
-            <div class="kpi-value" id="kpiWife">0 ج.م</div>
-        </div>
-    </div>
-
-    <!-- رسم بياني / هيستوجرام -->
-    <div class="card">
-        <div class="card-title">📊 هيستوجرام المصاريف حسب القسم</div>
-        <div class="chart-container">
-            <canvas id="expenseChart"></canvas>
-        </div>
-    </div>
-
-    <!-- نموذج إضافة مصروف جديد -->
-    <div class="card">
-        <div class="card-title">➕ تسجيل مشتريات جديدة</div>
-        <form id="expenseForm" onsubmit="addExpense(event)">
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>التاريخ:</label>
-                    <input type="date" id="dateInput" required>
-                </div>
-                <div class="form-group">
-                    <label>الشهر:</label>
-                    <select id="monthInput" required>
-                        <option value="يناير">يناير</option>
-                        <option value="فبراير">فبراير</option>
-                        <option value="مارس">مارس</option>
-                        <option value="أبريل">أبريل</option>
-                        <option value="مايو">مايو</option>
-                        <option value="يونيو">يونيو</option>
-                        <option value="يوليو">يوليو</option>
-                        <option value="أغسطس">أغسطس</option>
-                        <option value="سبتمبر" selected>سبتمبر</option>
-                        <option value="أكتوبر">أكتوبر</option>
-                        <option value="نوفمبر">نوفمبر</option>
-                        <option value="ديسمبر">ديسمبر</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>القسم / الفئة:</label>
-                    <select id="categoryInput" required>
-                        <option value="منظفات">منظفات</option>
-                        <option value="لحوم">لحوم</option>
-                        <option value="خضروات">خضروات</option>
-                        <option value="فواكه">فواكه</option>
-                        <option value="ورقيات">ورقيات</option>
-                        <option value="بهارات">بهارات</option>
-                        <option value="خزين مطبخ">خزين مطبخ</option>
-                        <option value="مستلزمات للفطار">مستلزمات للفطار</option>
-                        <option value="أخرى">أخرى</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>مين دفع؟</label>
-                    <select id="buyerInput" required>
-                        <option value="الزوج">الزوج</option>
-                        <option value="الزوجة">الزوجة</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>السلعة / البيان:</label>
-                    <input type="text" id="itemInput" placeholder="مثال: 2 كيلو لحم" required>
-                </div>
-                <div class="form-group">
-                    <label>المبلغ (ج.م):</label>
-                    <input type="number" id="amountInput" step="0.5" placeholder="0.00" required>
-                </div>
-            </div>
-
-            <button type="submit" class="btn">💾 حفظ المصروف</button>
-        </form>
-    </div>
-
-    <!-- جدول المشتريات وأزرار الإكسيل -->
-    <div class="card">
-        <div class="card-title">
-            <span>📋 سجل المشتريات المسجلة</span>
-        </div>
-        
-        <button class="btn btn-excel" onclick="exportToExcel()">📊 تحميل شيت الإكسيل (.xlsx) دورياً</button>
-
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>القسم</th>
-                        <th>السلعة</th>
-                        <th>المشتري</th>
-                        <th>المبلغ</th>
-                        <th>حذف</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-    // تعيين تاريخ اليوم تلقائياً
-    document.getElementById('dateInput').valueAsDate = new Date();
-
-    const categories = ["منظفات", "لحوم", "خضروات", "فواكه", "ورقيات", "بهارات", "خزين مطبخ", "مستلزمات للفطار", "أخرى"];
-
-    // البيانات الأولية للتجربة
-    let expenses = JSON.parse(localStorage.getItem('home_expenses')) || [
-        { date: '2026-09-01', month: 'سبتمبر', category: 'لحوم', item: '2 كيلو لحم بقر', buyer: 'الزوج', amount: 700 },
-        { date: '2026-09-02', month: 'سبتمبر', category: 'خضروات', item: 'طماطم وبطاطس', buyer: 'الزوجة', amount: 180 },
-        { date: '2026-09-03', month: 'سبتمبر', category: 'منظفات', item: 'مسحوق غسيل', buyer: 'الزوج', amount: 320 },
-        { date: '2026-09-04', month: 'سبتمبر', category: 'مستلزمات للفطار', item: 'جبن ورومي وبيض', buyer: 'الزوجة', amount: 250 },
-        { date: '2026-09-05', month: 'سبتمبر', category: 'فواكه', item: 'مانجو وتفاح', buyer: 'الزوج', amount: 210 }
-    ];
-
-    let chartInstance = null;
-
-    function saveExpenses() {
-        localStorage.setItem('home_expenses', JSON.stringify(expenses));
-    }
-
-    function addExpense(e) {
-        e.preventDefault();
-        const newExpense = {
-            date: document.getElementById('dateInput').value,
-            month: document.getElementById('monthInput').value,
-            category: document.getElementById('categoryInput').value,
-            item: document.getElementById('itemInput').value,
-            buyer: document.getElementById('buyerInput').value,
-            amount: parseFloat(document.getElementById('amountInput').value)
-        };
-
-        expenses.push(newExpense);
-        saveExpenses();
-        
-        // إعادة تصفية الفلتر لشهر العنصر المضاف لرؤيته مباشرة
-        document.getElementById('filterMonth').value = newExpense.month;
-        
-        document.getElementById('itemInput').value = '';
-        document.getElementById('amountInput').value = '';
-        
-        updateDashboard();
-    }
-
-    function deleteExpense(index) {
-        if(confirm('هل انت أصلك عايز تحذف السجل ده؟')) {
-            expenses.splice(index, 1);
-            saveExpenses();
-            updateDashboard();
-        }
-    }
-
-    function updateDashboard() {
-        const selectedMonth = document.getElementById('filterMonth').value;
-        const filteredData = selectedMonth === 'الكل' ? expenses : expenses.filter(x => x.month === selectedMonth);
-
-        // حساب الإحصائيات
-        let total = 0, husband = 0, wife = 0;
-        const catTotals = {};
-        categories.forEach(c => catTotals[c] = 0);
-
-        filteredData.forEach(item => {
-            total += item.amount;
-            if(item.buyer === 'الزوج') husband += item.amount;
-            if(item.buyer === 'الزوجة') wife += item.amount;
-            if(catTotals[item.category] !== undefined) {
-                catTotals[item.category] += item.amount;
-            } else {
-                catTotals[item.category] = item.amount;
-            }
-        });
-
-        document.getElementById('kpiTotal').innerText = total.toLocaleString() + ' ج.م';
-        document.getElementById('kpiHusband').innerText = husband.toLocaleString() + ' ج.م';
-        document.getElementById('kpiWife').innerText = wife.toLocaleString() + ' ج.م';
-
-        // تحديث الجدول
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        filteredData.forEach((item) => {
-            const realIndex = expenses.indexOf(item);
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${item.date}</td>
-                <td>${item.category}</td>
-                <td>${item.item}</td>
-                <td>${item.buyer}</td>
-                <td><b>${item.amount} ج.م</b></td>
-                <td><button class="delete-btn" onclick="deleteExpense(${realIndex})">✕</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        // تحديث الرسم البياني (Histogram)
-        renderChart(catTotals);
-    }
-
-    function renderChart(catTotals) {
-        const ctx = document.getElementById('expenseChart').getContext('2d');
-        const dataValues = categories.map(c => catTotals[c]);
-
-        if(chartInstance) chartInstance.destroy();
-
-        chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: categories,
-                datasets: [{
-                    label: 'إجمالي المصاريف (جنية)',
-                    data: dataValues,
-                    backgroundColor: '#1F4E79',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { beginAtZero: true }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        ahmed: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        asmaa: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        }
+                    }
                 }
             }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .pin-digit {
+            -webkit-text-security: disc;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-2 sm:p-4 gap-4 bg-slate-950 text-slate-100">
+
+    <!-- PASSWORD LOCK SCREEN OVERLAY -->
+    <div id="pinLockModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl"></div>
+
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-rose-600 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+
+            <h2 class="text-xl font-black text-white mb-1">بيت أحمد وأسماء</h2>
+            <p class="text-xs text-slate-400 font-semibold mb-6">أدخل كلمة السر الخاصة للوصول للتطبيق</p>
+
+            <form onsubmit="handlePinSubmit(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="password" maxlength="6" id="pinInput" placeholder="• • • •" class="w-full bg-slate-800/80 border border-slate-700 text-center text-2xl font-bold tracking-widest text-white py-3 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-600">
+                </div>
+
+                <div id="pinErrorMsg" class="text-xs text-rose-400 font-bold hidden flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>كلمة السر غير صحيحة، حاول مجدداً</span>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-rose-600 hover:opacity-90 text-white font-extrabold py-3 rounded-2xl shadow-lg transition-all active:scale-98 text-sm">
+                    تأكيد وإلغاء القفل <i class="fa-solid fa-key mr-1"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOP HEADER BAR -->
+    <header class="bg-slate-900/90 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 shadow-lg">
+        <div class="flex items-center justify-between w-full md:w-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-rose-500 flex items-center justify-center text-white shadow-md text-xl font-bold">
+                    <i class="fa-solid fa-house-chimney-heart"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight">بيت أحمد وأسماء</h1>
+                    <p class="text-[11px] text-slate-400 font-semibold flex items-center gap-1.5">
+                        <span id="syncStatusDot" class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span id="syncStatusText">جاري الاتصال بالسحابة...</span>
+                    </p>
+                </div>
+            </div>
+
+            <button onclick="lockApp()" class="md:hidden bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="قفل التطبيق">
+                <i class="fa-solid fa-lock"></i>
+            </button>
+        </div>
+
+        <!-- Month Filter Selector & Excel Export & Lock Button -->
+        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+            <div class="flex items-center bg-slate-800/90 rounded-xl px-3 py-1.5 border border-slate-700 text-xs font-bold text-slate-300 w-full sm:w-auto">
+                <i class="fa-regular fa-calendar-check text-indigo-400 ml-2"></i>
+                <span class="ml-2 whitespace-nowrap">الشهر:</span>
+                <select id="filterMonthSelect" onchange="handleMonthChange()" class="bg-transparent font-extrabold text-indigo-300 focus:outline-none cursor-pointer w-full">
+                    <option value="ALL">🗓️ جميع الشهور</option>
+                    <option value="يناير">يناير</option>
+                    <option value="فبراير">فبراير</option>
+                    <option value="مارس">مارس</option>
+                    <option value="أبريل">أبريل</option>
+                    <option value="مايو">مايو</option>
+                    <option value="يونيو">يونيو</option>
+                    <option value="يوليو">يوليو</option>
+                    <option value="أغسطس">أغسطس</option>
+                    <option value="سبتمبر">سبتمبر</option>
+                    <option value="أكتوبر">أكتوبر</option>
+                    <option value="نوفمبر">نوفمبر</option>
+                    <option value="ديسمبر">ديسمبر</option>
+                </select>
+            </div>
+
+            <button onclick="exportToExcel()" class="bg-emerald-600/90 hover:bg-emerald-600 active:scale-95 text-white text-xs font-extrabold py-2 px-3.5 rounded-xl border border-emerald-500/30 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
+                <i class="fa-solid fa-file-excel text-sm"></i>
+                <span>تصدير لإكسيل (XLSX)</span>
+            </button>
+
+            <button onclick="lockApp()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="قفل التطبيق">
+                <i class="fa-solid fa-lock"></i>
+                <span>قفل</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- KPI OVERVIEW STATS CARDS GRID -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shrink-0">
+        
+        <!-- Total Expense Card -->
+        <div class="bg-slate-900 border border-slate-800 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 mb-2">
+                <span class="text-xs font-bold">مصاريف الشهر</span>
+                <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-wallet text-indigo-400"></i>
+                </div>
+            </div>
+            <div>
+                <div class="text-xl sm:text-2xl font-black text-white tracking-tight" id="kpiTotalAmount">0 <span class="text-xs font-bold text-slate-400">ج.م</span></div>
+                <div class="text-[10px] text-slate-500 mt-0.5" id="kpiTotalSubtext">إجمالي الأصناف المسجلة</div>
+            </div>
+        </div>
+
+        <!-- Ahmed Card -->
+        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-ahmed-500/20 flex flex-col justify-between relative overflow-hidden">
+            <div class="flex justify-between items-center text-slate-400 mb-2">
+                <span class="text-xs font-bold text-ahmed-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-large text-ahmed-500"></i> دفعه أحمد
+                </span>
+                <span id="kpiAhmedBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-ahmed-500/20 text-ahmed-300 border border-ahmed-500/30">0%</span>
+            </div>
+            <div>
+                <div class="text-xl font-black text-ahmed-400 tracking-tight" id="kpiAhmedAmount">0 <span class="text-xs font-bold text-slate-500">ج.م</span></div>
+                <div class="text-[10px] text-slate-400 mt-0.5" id="kpiAhmedCount">0 مشتريات</div>
+            </div>
+        </div>
+
+        <!-- Asmaa Card -->
+        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-asmaa-500/20 flex flex-col justify-between relative overflow-hidden">
+            <div class="flex justify-between items-center text-slate-400 mb-2">
+                <span class="text-xs font-bold text-asmaa-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-large text-asmaa-500"></i> دفعتها أسماء
+                </span>
+                <span id="kpiAsmaaBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-asmaa-500/20 text-asmaa-300 border border-asmaa-500/30">0%</span>
+            </div>
+            <div>
+                <div class="text-xl font-black text-asmaa-400 tracking-tight" id="kpiAsmaaAmount">0 <span class="text-xs font-bold text-slate-500">ج.م</span></div>
+                <div class="text-[10px] text-slate-400 mt-0.5" id="kpiAsmaaCount">0 مشتريات</div>
+            </div>
+        </div>
+
+        <!-- Total Items Count -->
+        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 mb-2">
+                <span class="text-xs font-bold text-slate-300">إجمالي المشتريات</span>
+                <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-300">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                </div>
+            </div>
+            <div>
+                <div class="text-xl font-black text-slate-100 tracking-tight" id="kpiTotalCount">0</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">عمليات شراء ناجحة</div>
+            </div>
+        </div>
+
+        <!-- Top Category Card -->
+        <div class="col-span-2 sm:col-span-1 bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 mb-2">
+                <span class="text-xs font-bold text-slate-300">الأعلى استهلاكاً</span>
+                <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+            </div>
+            <div>
+                <div class="text-sm font-black text-amber-400 truncate" id="kpiTopCategory">لا يوجد</div>
+                <div class="text-[10px] text-slate-400 mt-0.5" id="kpiTopCategoryAmount">0 ج.م</div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- MAIN DASHBOARD GRID -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        
+        <!-- LEFT COLUMN: INPUT FORM & CATEGORY PIE CHART (lg:col-span-4) -->
+        <div class="lg:col-span-4 flex flex-col gap-4">
+            
+            <!-- Quick Add Expense Form -->
+            <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                    <h2 class="font-extrabold text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-circle-plus text-indigo-400"></i>
+                        تسجيل مشتريات جديدة
+                    </h2>
+                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">إدخال سحابي مباشر</span>
+                </div>
+
+                <form id="addExpenseForm" onsubmit="handleAddExpense(event)" class="space-y-3">
+                    <!-- Item Name -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">اسم الغرض / المشتريات *</label>
+                        <input type="text" id="itemName" required placeholder="مثلاً: 2 كيلو لحمة، أرييل..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+                    </div>
+
+                    <!-- Amount & Date -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">السعر (ج.م) *</label>
+                            <input type="number" step="0.5" id="itemAmount" required placeholder="0.00" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">التاريخ</label>
+                            <input type="date" id="itemDate" required class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <!-- Buyer Toggle Selection (Ahmed vs Asmaa) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">مين اللي دفع؟ *</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="setBuyer('أحمد')" id="btnBuyerAhmed" class="buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-ahmed-500 bg-ahmed-600 text-white shadow-sm transition-all">
+                                <i class="fa-solid fa-user-large"></i> أحمد
+                            </button>
+                            <button type="button" onclick="setBuyer('أسماء')" id="btnBuyerAsmaa" class="buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all">
+                                <i class="fa-solid fa-user-large"></i> أسماء
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category & Month Grid -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">القسم *</label>
+                            <select id="itemCategory" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                <option value="منظفات">🧼 منظفات</option>
+                                <option value="لحوم">🥩 لحوم</option>
+                                <option value="خضروات">🥕 خضروات</option>
+                                <option value="فواكه">🍎 فواكه</option>
+                                <option value="ورقيات">🌿 ورقيات</option>
+                                <option value="بهارات">🌶️ بهارات</option>
+                                <option value="خزين مطبخ">📦 خزين مطبخ</option>
+                                <option value="مستلزمات للفطار">🍳 مستلزمات للفطار</option>
+                                <option value="أخرى">🛍️ أخرى</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">الشهر *</label>
+                            <select id="itemMonth" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                <option value="يناير">يناير</option>
+                                <option value="فبراير">فبراير</option>
+                                <option value="مارس">مارس</option>
+                                <option value="أبريل">أبريل</option>
+                                <option value="مايو">مايو</option>
+                                <option value="يونيو">يونيو</option>
+                                <option value="يوليو">يوليو</option>
+                                <option value="أغسطس">أغسطس</option>
+                                <option value="سبتمبر">سبتمبر</option>
+                                <option value="أكتوبر">أكتوبر</option>
+                                <option value="نوفمبر">نوفمبر</option>
+                                <option value="ديسمبر">ديسمبر</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                        <span>حفظ وإرسال للطرف الآخر</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Category Donut/Pie Chart Card -->
+            <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between flex-1">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-extrabold text-white text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-rose-400"></i>
+                        النسبة المئوية للأقسام (Pie Chart)
+                    </h3>
+                    <span class="text-[10px] text-slate-400">مقسم حسب الأقسام</span>
+                </div>
+                <div class="relative h-52 w-full flex items-center justify-center">
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: HISTOGRAM & TRANSACTIONS TABLE (lg:col-span-8) -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
+            
+            <!-- Histogram Bar Chart Card -->
+            <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800">
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <h3 class="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-indigo-400"></i>
+                            هيستوجرام المصاريف حسب الأقسام
+                        </h3>
+                        <p class="text-[10px] text-slate-400">تكلفة كل قسم بالجنيه المصري للشهر المحدد</p>
+                    </div>
+                </div>
+
+                <div class="relative h-56 w-full">
+                    <canvas id="categoryHistogramChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Detailed Table & Search View -->
+            <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col flex-1">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 mb-3">
+                    <h3 class="font-extrabold text-white text-xs sm:text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-indigo-400"></i>
+                        سجل المشتريات المسجلة
+                    </h3>
+
+                    <!-- Search Box -->
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="renderTable()" placeholder="بحث باسم السلعة..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl pr-8 pl-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 placeholder:text-slate-500">
+                    </div>
+                </div>
+
+                <!-- Scrollable Table -->
+                <div class="overflow-x-auto flex-1 max-h-80">
+                    <table class="w-full text-right text-xs">
+                        <thead class="sticky top-0 bg-slate-800 text-slate-300 font-bold border-b border-slate-700">
+                            <tr>
+                                <th class="p-2.5 rounded-r-xl">التاريخ</th>
+                                <th class="p-2.5">القسم</th>
+                                <th class="p-2.5">السلعة / البيان</th>
+                                <th class="p-2.5">المشتري</th>
+                                <th class="p-2.5">المبلغ</th>
+                                <th class="p-2.5 text-center rounded-l-xl">حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody" class="divide-y divide-slate-800 text-slate-200">
+                            <!-- Injected via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Custom Delete Modal (NO alert/confirm used) -->
+    <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 w-full max-w-sm text-center shadow-xl">
+            <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 class="font-extrabold text-white text-sm mb-1">تأكيد الحذف</h3>
+            <p class="text-xs text-slate-400 mb-5">هل أنت أكيد من حذف هذا العنصر؟ سيتم رفعه من الموبايلين فوراً.</p>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="closeDeleteModal()" class="py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">إلغاء</button>
+                <button onclick="confirmDeleteExpense()" class="py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">نعم، إحذف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 opacity-0 pointer-events-none transition-all z-50">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">تم الحفظ بنجاح</span>
+    </div>
+
+    <!-- Firebase Module Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global State Variables
+        window.expenses = [];
+        window.currentBuyer = 'أحمد';
+        window.pendingDeleteId = null;
+        window.db = null;
+        window.expensesCol = null;
+
+        // PIN Code Storage Key
+        const PIN_KEY = 'ahmed_asmaa_pin_unlocked';
+
+        // Check PIN on load
+        window.checkPinState = function() {
+            const isUnlocked = localStorage.getItem(PIN_KEY) === 'true';
+            const modal = document.getElementById('pinLockModal');
+            if (isUnlocked) {
+                modal.classList.add('hidden');
+            } else {
+                modal.classList.remove('hidden');
+            }
+        };
+
+        window.handlePinSubmit = function(e) {
+            e.preventDefault();
+            const pinVal = document.getElementById('pinInput').value.trim();
+            const errEl = document.getElementById('pinErrorMsg');
+
+            if (pinVal === '1610') {
+                localStorage.setItem(PIN_KEY, 'true');
+                document.getElementById('pinLockModal').classList.add('hidden');
+                document.getElementById('pinInput').value = '';
+                errEl.classList.add('hidden');
+                showToast('أهلاً بكما في دفتر البيت 🏠');
+            } else {
+                errEl.classList.remove('hidden');
+                document.getElementById('pinInput').value = '';
+            }
+        };
+
+        window.lockApp = function() {
+            localStorage.removeItem(PIN_KEY);
+            document.getElementById('pinLockModal').classList.remove('hidden');
+        };
+
+        // Firebase Setup & Fallback
+        async function initFirebase() {
+            try {
+                // Check if Firebase config exists in window
+                const config = typeof __firebase_config !== 'undefined' 
+                    ? JSON.parse(__firebase_config) 
+                    : {
+                        // Fallback client config space
+                        apiKey: "demo-key",
+                        authDomain: "demo.firebaseapp.com",
+                        projectId: "demo-project",
+                        storageBucket: "demo.appspot.com",
+                        messagingSenderId: "123456",
+                        appId: "1:123456:web:123456"
+                      };
+
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses-app';
+                const app = initializeApp(config);
+                const auth = getAuth(app);
+                window.db = getFirestore(app);
+
+                // Authenticate
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Shared Public Collection Path
+                window.expensesCol = collection(window.db, 'artifacts', appId, 'public', 'data', 'expenses');
+
+                // Real-time Listener (RULE 1 & RULE 2)
+                onSnapshot(window.expensesCol, (snapshot) => {
+                    window.expenses = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    updateSyncStatus(true);
+                    updateDashboard();
+                }, (error) => {
+                    console.warn('Firebase snapshot warning, fallback to local storage:', error);
+                    updateSyncStatus(false);
+                    loadLocalExpenses();
+                });
+
+            } catch (err) {
+                console.warn('Firebase error, using local state:', err);
+                updateSyncStatus(false);
+                loadLocalExpenses();
+            }
+        }
+
+        function loadLocalExpenses() {
+            const local = localStorage.getItem('ahmed_asmaa_local_expenses');
+            if (local) {
+                window.expenses = JSON.parse(local);
+            } else {
+                // Default Seed Data
+                window.expenses = [
+                    { id: '1', date: '2026-09-01', month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم بقر كاندوز', buyer: 'أحمد', amount: 750 },
+                    { id: '2', date: '2026-09-02', month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك وجيل', buyer: 'أسماء', amount: 380 },
+                    { id: '3', date: '2026-09-03', month: 'سبتمبر', category: 'خضروات', name: 'طماطم وبطاطس وبصل للأسبوع', buyer: 'أسماء', amount: 220 },
+                    { id: '4', date: '2026-09-04', month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ورومي ولبتون', buyer: 'أحمد', amount: 310 },
+                    { id: '5', date: '2026-09-05', month: 'سبتمبر', category: 'فواكه', name: 'مانجو وتفاح وموز', buyer: 'أحمد', amount: 190 },
+                    { id: '6', date: '2026-09-06', month: 'سبتمبر', category: 'خزين مطبخ', name: 'أرز وزيت وسكر ومكرونات', buyer: 'أسماء', amount: 480 }
+                ];
+            }
+            updateDashboard();
+        }
+
+        function updateSyncStatus(isLive) {
+            const dot = document.getElementById('syncStatusDot');
+            const text = document.getElementById('syncStatusText');
+            if (isLive) {
+                dot.className = "inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                text.textContent = "متصل بالسحابة (تزامن لحظي مع الموبايل الآخر)";
+            } else {
+                dot.className = "inline-block w-2 h-2 rounded-full bg-amber-500";
+                text.textContent = "حفظ محلي في الموبايل";
+            }
+        }
+
+        window.handleAddExpense = async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('itemName').value.trim();
+            const amount = parseFloat(document.getElementById('itemAmount').value);
+            const date = document.getElementById('itemDate').value;
+            const category = document.getElementById('itemCategory').value;
+            const month = document.getElementById('itemMonth').value;
+
+            if (!name || isNaN(amount) || amount <= 0) return;
+
+            const newItem = {
+                name,
+                amount,
+                date,
+                category,
+                month,
+                buyer: window.currentBuyer,
+                createdAt: Date.now()
+            };
+
+            if (window.db && window.expensesCol) {
+                try {
+                    await addDoc(window.expensesCol, newItem);
+                } catch (err) {
+                    console.error('Error adding doc to Firebase:', err);
+                    newItem.id = Date.now().toString();
+                    window.expenses.unshift(newItem);
+                    localStorage.setItem('ahmed_asmaa_local_expenses', JSON.stringify(window.expenses));
+                    updateDashboard();
+                }
+            } else {
+                newItem.id = Date.now().toString();
+                window.expenses.unshift(newItem);
+                localStorage.setItem('ahmed_asmaa_local_expenses', JSON.stringify(window.expenses));
+                updateDashboard();
+            }
+
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemAmount').value = '';
+
+            showToast('تمت الإضافة وستظهر على موبايل الطرف الآخر فوراً 📲');
+        };
+
+        window.openDeleteModal = function(id) {
+            window.pendingDeleteId = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.add('flex');
+        };
+
+        window.closeDeleteModal = function() {
+            window.pendingDeleteId = null;
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('deleteModal').classList.remove('flex');
+        };
+
+        window.confirmDeleteExpense = async function() {
+            if (!window.pendingDeleteId) return;
+
+            const id = window.pendingDeleteId;
+            closeDeleteModal();
+
+            if (window.db && window.expensesCol) {
+                try {
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses-app';
+                    await deleteDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'expenses', id));
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    window.expenses = window.expenses.filter(x => x.id !== id);
+                    localStorage.setItem('ahmed_asmaa_local_expenses', JSON.stringify(window.expenses));
+                    updateDashboard();
+                }
+            } else {
+                window.expenses = window.expenses.filter(x => x.id !== id);
+                localStorage.setItem('ahmed_asmaa_local_expenses', JSON.stringify(window.expenses));
+                updateDashboard();
+            }
+
+            showToast('تم حذف المصروف 🗑️');
+        };
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            window.checkPinState();
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('itemDate').value = today;
+
+            const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            const currentMonthName = monthNames[new Date().getMonth()];
+            
+            document.getElementById('itemMonth').value = currentMonthName;
+            document.getElementById('filterMonthSelect').value = currentMonthName;
+
+            initFirebase();
         });
-    }
+    </script>
 
-    // تصدير البيانات إلى شيت إكسيل رسمي (.xlsx)
-    function exportToExcel() {
-        const dataToExport = expenses.map((x, idx) => ({
-            "م": idx + 1,
-            "التاريخ": x.date,
-            "الشهر": x.month,
-            "القسم": x.category,
-            "السلعة / البيان": x.item,
-            "المشتري": x.buyer,
-            "المبلغ (ج.م)": x.amount
-        }));
+    <!-- Chart Rendering & Dashboard UI Functions -->
+    <script>
+        let histogramChart = null;
+        let pieChart = null;
 
-        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "سجل المصاريف");
+        const categoriesMap = {
+            'منظفات': { icon: 'fa-soap', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+            'لحوم': { icon: 'fa-drumstick-bite', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' },
+            'خضروات': { icon: 'fa-carrot', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
+            'فواكه': { icon: 'fa-apple-whole', color: 'bg-pink-500/20 text-pink-300 border-pink-500/30' },
+            'ورقيات': { icon: 'fa-leaf', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+            'بهارات': { icon: 'fa-pepper-hot', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+            'خزين مطبخ': { icon: 'fa-boxes-stacked', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
+            'مستلزمات للفطار': { icon: 'fa-egg', color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
+            'أخرى': { icon: 'fa-basket-shopping', color: 'bg-slate-700/50 text-slate-300 border-slate-600' }
+        };
 
-        // اتجاه الشيت من اليمين للشمال
-        if(!workbook.Workbook) workbook.Workbook = {};
-        if(!workbook.Workbook.Views) workbook.Workbook.Views = [{}];
-        workbook.Workbook.Views[0].RTL = true;
+        function setBuyer(buyer) {
+            window.currentBuyer = buyer;
+            const btnAhmed = document.getElementById('btnBuyerAhmed');
+            const btnAsmaa = document.getElementById('btnBuyerAsmaa');
 
-        XLSX.writeFile(workbook, `مصاريف_البيت_العائلية_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
+            if (buyer === 'أحمد') {
+                btnAhmed.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-ahmed-500 bg-ahmed-600 text-white shadow-sm transition-all";
+                btnAsmaa.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all";
+            } else {
+                btnAhmed.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all";
+                btnAsmaa.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-asmaa-500 bg-asmaa-600 text-white shadow-sm transition-all";
+            }
+        }
 
-    // التشغيل عند الفتح
-    updateDashboard();
-</script>
+        function handleMonthChange() {
+            updateDashboard();
+        }
+
+        function getFilteredData() {
+            const selectedMonth = document.getElementById('filterMonthSelect').value;
+            const data = window.expenses || [];
+            if (selectedMonth === 'ALL') {
+                return data;
+            }
+            return data.filter(x => x.month === selectedMonth);
+        }
+
+        function updateDashboard() {
+            const filtered = getFilteredData();
+
+            let total = 0;
+            let ahmedTotal = 0;
+            let ahmedCount = 0;
+            let asmaaTotal = 0;
+            let asmaaCount = 0;
+
+            const catTotals = {
+                'منظفات': 0, 'لحوم': 0, 'خضروات': 0, 'فواكه': 0,
+                'ورقيات': 0, 'بهارات': 0, 'خزين مطبخ': 0, 'مستلزمات للفطار': 0, 'أخرى': 0
+            };
+
+            filtered.forEach(item => {
+                const amt = parseFloat(item.amount) || 0;
+                total += amt;
+
+                if (item.buyer === 'أحمد') {
+                    ahmedTotal += amt;
+                    ahmedCount++;
+                } else if (item.buyer === 'أسماء') {
+                    asmaaTotal += amt;
+                    asmaaCount++;
+                }
+
+                if (catTotals[item.category] !== undefined) {
+                    catTotals[item.category] += amt;
+                } else {
+                    catTotals['أخرى'] += amt;
+                }
+            });
+
+            // Update KPI Texts
+            document.getElementById('kpiTotalAmount').textContent = total.toLocaleString('ar-EG');
+            document.getElementById('kpiAhmedAmount').textContent = ahmedTotal.toLocaleString('ar-EG');
+            document.getElementById('kpiAhmedCount').textContent = `${ahmedCount} مشتريات`;
+
+            document.getElementById('kpiAsmaaAmount').textContent = asmaaTotal.toLocaleString('ar-EG');
+            document.getElementById('kpiAsmaaCount').textContent = `${asmaaCount} مشتريات`;
+
+            document.getElementById('kpiTotalCount').textContent = filtered.length;
+
+            const totalSplit = (ahmedTotal + asmaaTotal) || 1;
+            const ahmedPct = Math.round((ahmedTotal / totalSplit) * 100);
+            const asmaaPct = 100 - ahmedPct;
+
+            document.getElementById('kpiAhmedBadge').textContent = `${ahmedPct}%`;
+            document.getElementById('kpiAsmaaBadge').textContent = `${asmaaPct}%`;
+
+            // Top Category
+            let topCat = 'لا يوجد';
+            let maxAmt = 0;
+            Object.keys(catTotals).forEach(cat => {
+                if (catTotals[cat] > maxAmt) {
+                    maxAmt = catTotals[cat];
+                    topCat = cat;
+                }
+            });
+            document.getElementById('kpiTopCategory').textContent = topCat;
+            document.getElementById('kpiTopCategoryAmount').textContent = `${maxAmt.toLocaleString('ar-EG')} ج.م`;
+
+            renderHistogram(catTotals);
+            renderPieChart(catTotals);
+            renderTable();
+        }
+
+        function renderHistogram(catTotals) {
+            const ctx = document.getElementById('categoryHistogramChart').getContext('2d');
+            const labels = Object.keys(catTotals);
+            const dataValues = Object.values(catTotals);
+
+            if (histogramChart) histogramChart.destroy();
+
+            histogramChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'المبلغ (ج.م)',
+                        data: dataValues,
+                        backgroundColor: [
+                            '#a855f7', '#f43f5e', '#f97316', '#ec4899',
+                            '#10b981', '#f59e0b', '#3b82f6', '#eab308', '#64748b'
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8', font: { family: 'Cairo', size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#cbd5e1', font: { family: 'Cairo', size: 10, weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // CATEGORY PIE CHART
+        function renderPieChart(catTotals) {
+            const ctx = document.getElementById('categoryPieChart').getContext('2d');
+
+            // Filter non-zero categories
+            const labels = [];
+            const dataValues = [];
+            const colors = [];
+            const colorPalette = {
+                'منظفات': '#a855f7',
+                'لحوم': '#f43f5e',
+                'خضروات': '#f97316',
+                'فواكه': '#ec4899',
+                'ورقيات': '#10b981',
+                'بهارات': '#f59e0b',
+                'خزين مطبخ': '#3b82f6',
+                'مستلزمات للفطار': '#eab308',
+                'أخرى': '#64748b'
+            };
+
+            Object.keys(catTotals).forEach(cat => {
+                if (catTotals[cat] > 0) {
+                    labels.push(cat);
+                    dataValues.push(catTotals[cat]);
+                    colors.push(colorPalette[cat] || '#64748b');
+                }
+            });
+
+            if (pieChart) pieChart.destroy();
+
+            if (labels.length === 0) {
+                labels.push('لا توجد بيانات');
+                dataValues.push(1);
+                colors.push('#334155');
+            }
+
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#0f172a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'left',
+                            labels: {
+                                color: '#cbd5e1',
+                                font: { family: 'Cairo', size: 10, weight: 'bold' },
+                                boxWidth: 12
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('transactionsTableBody');
+            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+            const filtered = getFilteredData().filter(item => !searchVal || item.name.toLowerCase().includes(searchVal));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-slate-500 font-bold">لا توجد مشتريات مسجلة</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const catObj = categoriesMap[item.category] || categoriesMap['أخرى'];
+                const isAhmed = item.buyer === 'أحمد';
+                const buyerBadge = isAhmed 
+                    ? '<span class="bg-ahmed-500/20 text-ahmed-300 border border-ahmed-500/30 px-2 py-0.5 rounded-md font-extrabold text-[10px]">أحمد</span>'
+                    : '<span class="bg-asmaa-500/20 text-asmaa-300 border border-asmaa-500/30 px-2 py-0.5 rounded-md font-extrabold text-[10px]">أسماء</span>';
+
+                return `
+                    <tr class="hover:bg-slate-800/50 transition-colors">
+                        <td class="p-2.5 font-semibold text-slate-400 whitespace-nowrap">${item.date}</td>
+                        <td class="p-2.5 whitespace-nowrap">
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border ${catObj.color} font-bold text-[11px]">
+                                <i class="fa-solid ${catObj.icon}"></i> ${item.category}
+                            </span>
+                        </td>
+                        <td class="p-2.5 font-extrabold text-white">${escapeHtml(item.name)}</td>
+                        <td class="p-2.5">${buyerBadge}</td>
+                        <td class="p-2.5 font-black text-slate-100">${item.amount} <span class="text-[10px] text-slate-400">ج.م</span></td>
+                        <td class="p-2.5 text-center">
+                            <button onclick="openDeleteModal('${item.id}')" class="w-6 h-6 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 inline-flex items-center justify-center transition-all">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportToExcel() {
+            const dataToExport = (window.expenses || []).map((x, idx) => ({
+                "م": idx + 1,
+                "التاريخ": x.date,
+                "الشهر": x.month,
+                "القسم": x.category,
+                "اسم السلعة / المشتريات": x.name,
+                "المشتري (من دفع؟)": x.buyer,
+                "المبلغ (ج.م)": x.amount
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "مصاريف أحمد وأسماء");
+
+            if (!workbook.Workbook) workbook.Workbook = {};
+            if (!workbook.Workbook.Views) workbook.Workbook.Views = [{}];
+            workbook.Workbook.Views[0].RTL = true;
+
+            XLSX.writeFile(workbook, `مصاريف_بيت_أحمد_وأسماء_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            showToast('تم تحميل شيت الإكسيل 📊');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2200);
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
 </body>
 </html>
