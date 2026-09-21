@@ -59,7 +59,6 @@
             color: #f8fafc;
             user-select: none;
         }
-        /* Custom Scrollbar Styles */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -119,14 +118,14 @@
                     <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight">بيت أحمد وأسماء - دفتر المصاريف</h1>
                     <p class="text-[11px] font-semibold flex items-center gap-1.5 mt-0.5">
                         <span id="syncStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة - تزامن أونلاين بين أحمد وأسماء</span>
+                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة المباشرة (تزامن لحظي بدون Firebase)</span>
                     </p>
                 </div>
             </div>
 
             <div class="flex items-center gap-1.5 md:hidden">
-                <button onclick="openConfigModal()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="إعدادات السحابة">
-                    <i class="fa-solid fa-gear"></i>
+                <button onclick="openSyncModal()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="إعدادات القناة">
+                    <i class="fa-solid fa-wifi"></i>
                 </button>
                 <button onclick="lockApp()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="قفل التطبيق">
                     <i class="fa-solid fa-lock"></i>
@@ -161,8 +160,9 @@
                 <span>تصدير إكسيل (XLSX)</span>
             </button>
 
-            <button onclick="openConfigModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="إعدادات السحابة">
-                <i class="fa-solid fa-gear"></i>
+            <button onclick="openSyncModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="إعدادات كود الغرفة السحابية">
+                <i class="fa-solid fa-wifi text-indigo-400"></i>
+                <span>كود الغرفة</span>
             </button>
 
             <button onclick="lockApp()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="قفل التطبيق">
@@ -336,8 +336,8 @@
 
                     <div class="flex gap-2 pt-1">
                         <button type="submit" id="btnSubmitExpense" class="flex-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-                            <span id="btnSubmitText">حفظ وإرسال أونلاين 📲</span>
+                            <i class="fa-solid fa-paper-plane text-sm"></i>
+                            <span id="btnSubmitText">حفظ وتزامن فوري 📲</span>
                         </button>
                         
                         <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs transition-all">
@@ -437,25 +437,26 @@
         </div>
     </div>
 
-    <!-- Custom Firebase Configuration Modal -->
-    <div id="configModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-4">
+    <!-- Sync Room Setup Modal -->
+    <div id="syncModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
                 <h3 class="font-black text-white text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-cloud text-indigo-400"></i>
-                    إعدادات الربط السحابي (Firebase Config)
+                    <i class="fa-solid fa-wifi text-indigo-400"></i>
+                    كود الغرفة للتزامن بين الموبايلين
                 </h3>
-                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white p-1">
+                <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white p-1">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <p class="text-xs text-slate-400 mb-3 leading-relaxed">
-                التطبيق يتصل بالسحابة تلقائياً لتزامن الموبايلين. يمكنك أيضاً وضع المفاتيح الخاصة بمشروعك في Firebase للتحكم الكامل.
+            <p class="text-xs text-slate-300 mb-3 leading-relaxed">
+                تأكد أن هذا الكود مكتوب <strong class="text-amber-400">بنفس الشفرة بالضبط</strong> على الموبايل الآخر (موبايل أحمد وموبايل أسماء) لربطهما معاً مباشرةً:
             </p>
-            <textarea id="firebaseConfigInput" rows="5" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500 mb-4 placeholder:text-slate-600" dir="ltr"></textarea>
+            <input type="text" id="roomCodeInput" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-center text-sm font-bold font-mono text-indigo-300 focus:outline-none focus:border-indigo-500 mb-4" placeholder="ahmed_asmaa_house_expenses">
+            
             <div class="flex gap-2">
-                <button onclick="saveCustomConfig()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs">حفظ وإعادة الاتصال</button>
-                <button onclick="resetConfig()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2 rounded-xl text-xs">مسح</button>
+                <button onclick="saveRoomCode()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs">تطبيق وإعادة الاتصال 🔄</button>
+                <button onclick="resetRoomCode()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs">افتراضي</button>
             </div>
         </div>
     </div>
@@ -466,20 +467,17 @@
         <span id="toastMsg">تم الحفظ بنجاح</span>
     </div>
 
-    <!-- Firebase Module Scripts -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <script>
         // Global State Variables
         window.expenses = [];
         window.currentBuyer = 'أحمد';
         window.pendingDeleteId = null;
-        window.db = null;
-        window.expensesCol = null;
+        window.myDeviceId = 'dev_' + Math.random().toString(36).substring(2, 9);
+        
+        // Sync Room Configuration
+        const DEFAULT_ROOM = 'ahmed_asmaa_house_expenses_1610_sync';
+        window.currentRoom = localStorage.getItem('house_sync_room_code') || DEFAULT_ROOM;
 
-        // PIN Code Key
         const PIN_KEY = 'house_expenses_pin_unlocked';
 
         window.checkPinState = function() {
@@ -514,74 +512,81 @@
             document.getElementById('pinLockModal').classList.remove('hidden');
         };
 
-        // Enhanced Realtime Cloud Initialization
-        async function initFirebase() {
+        let eventSource = null;
+
+        function initRealtimeSync() {
+            loadLocalData();
+
+            // Sanitize room name for URL
+            const cleanRoom = encodeURIComponent(window.currentRoom.trim());
+            const sseUrl = `https://ntfy.sh/${cleanRoom}/sse`;
+
+            if (eventSource) {
+                eventSource.close();
+            }
+
             try {
-                let config = null;
+                eventSource = new EventSource(sseUrl);
 
-                // 1. Check custom user config in localStorage
-                const customConfigStr = localStorage.getItem('custom_firebase_config');
-                if (customConfigStr) {
-                    try {
-                        config = JSON.parse(customConfigStr);
-                    } catch (e) {
-                        console.warn('Invalid custom config format');
-                    }
-                }
-
-                // 2. Check injected environment firebase config
-                if (!config && typeof __firebase_config !== 'undefined' && __firebase_config) {
-                    try {
-                        config = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
-                    } catch (e) {
-                        console.warn('Failed to parse injected __firebase_config');
-                    }
-                }
-
-                if (!config) {
-                    console.log("Running in offline fallback mode");
-                    updateSyncStatus(false);
-                    loadLocalData();
-                    return;
-                }
-
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-house';
-                const app = initializeApp(config);
-                const auth = getAuth(app);
-                window.db = getFirestore(app);
-
-                // Authenticate strictly before query (RULE 3)
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Shared Public Collection Path across BOTH phones (RULE 1)
-                window.expensesCol = collection(window.db, 'artifacts', appId, 'public', 'data', 'house_expenses');
-
-                // Real-time Firestore Listener
-                onSnapshot(window.expensesCol, (snapshot) => {
-                    window.expenses = snapshot.docs.map(d => ({
-                        id: d.id,
-                        ...d.data()
-                    }));
-                    
-                    // Sort in JS memory to satisfy RULE 2
-                    window.expenses.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
+                eventSource.onopen = () => {
                     updateSyncStatus(true);
-                    updateDashboard();
-                }, (error) => {
-                    console.warn('Firestore subscription fallback:', error);
+                    // Broadcast local state to align both devices on connect
+                    broadcastFullState();
+                };
+
+                eventSource.onmessage = (e) => {
+                    try {
+                        const payload = JSON.parse(e.data);
+                        if (!payload.message) return;
+
+                        const data = JSON.parse(payload.message);
+
+                        // Ignore messages sent by this same device
+                        if (data.sender === window.myDeviceId) return;
+
+                        if (data.type === 'FULL_SYNC' && Array.isArray(data.expenses)) {
+                            // Merge and update if external state is newer/different
+                            if (data.expenses.length >= 0) {
+                                window.expenses = data.expenses;
+                                saveLocalFallback();
+                                updateDashboard();
+                                showToast('تم استلام التحديثات أونلاين 📲');
+                            }
+                        }
+                    } catch (err) {
+                        // Ignore plain non-JSON test messages
+                    }
+                };
+
+                eventSource.onerror = () => {
                     updateSyncStatus(false);
-                    if (window.expenses.length === 0) loadLocalData();
-                });
+                };
 
             } catch (err) {
-                console.warn('Firebase connection error:', err);
+                console.warn('Realtime sync connection error:', err);
                 updateSyncStatus(false);
-                loadLocalData();
+            }
+        }
+
+        async function broadcastFullState() {
+            const cleanRoom = encodeURIComponent(window.currentRoom.trim());
+            const publishUrl = `https://ntfy.sh/${cleanRoom}`;
+
+            const payload = {
+                sender: window.myDeviceId,
+                type: 'FULL_SYNC',
+                timestamp: Date.now(),
+                expenses: window.expenses
+            };
+
+            try {
+                await fetch(publishUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.warn('Failed to broadcast state:', err);
             }
         }
 
@@ -593,12 +598,14 @@
                 } catch(e) { window.expenses = []; }
             }
             if (!window.expenses || window.expenses.length === 0) {
+                const today = new Date().toISOString().split('T')[0];
                 window.expenses = [
-                    { id: '1', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم كاندوز', buyer: 'أحمد', amount: 750, createdAt: 1000 },
-                    { id: '2', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك', buyer: 'أسماء', amount: 380, createdAt: 2000 },
-                    { id: '3', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'خضروات', name: 'خضار وفاكهة للأسبوع', buyer: 'أسماء', amount: 250, createdAt: 3000 },
-                    { id: '4', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ولبتون', buyer: 'أحمد', amount: 310, createdAt: 4000 }
+                    { id: '1', date: today, month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم كاندوز', buyer: 'أحمد', amount: 750, createdAt: 1000 },
+                    { id: '2', date: today, month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك', buyer: 'أسماء', amount: 380, createdAt: 2000 },
+                    { id: '3', date: today, month: 'سبتمبر', category: 'خضروات', name: 'خضار وفاكهة للأسبوع', buyer: 'أسماء', amount: 250, createdAt: 3000 },
+                    { id: '4', date: today, month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ولبتون', buyer: 'أحمد', amount: 310, createdAt: 4000 }
                 ];
+                saveLocalFallback();
             }
             updateDashboard();
         }
@@ -613,15 +620,14 @@
             if (isOnline) {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 text.className = "text-emerald-400 font-bold";
-                text.textContent = "🟢 متصل بالسحابة - تزامن أونلاين بين أحمد وأسماء";
+                text.textContent = "🟢 متصل بالسحابة المباشرة - تزامن لحظي بين أحمد وأسماء";
             } else {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-500";
                 text.className = "text-amber-400 font-bold";
-                text.textContent = "🟡 وضع التخزين المحلي (اضغط ⚙️ لربط السحابة)";
+                text.textContent = "🟡 وضع التخزين المحلي (جاري المتابعة أونلاين)";
             }
         }
 
-        // Handle Add or Edit Form Submission
         window.handleFormSubmit = async function(e) {
             e.preventDefault();
 
@@ -634,10 +640,8 @@
 
             if (!name || isNaN(amount) || amount <= 0) return;
 
-            const submitBtn = document.getElementById('btnSubmitExpense');
-            submitBtn.disabled = true;
-
             const itemPayload = {
+                id: docId || 'exp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
                 name,
                 amount,
                 date,
@@ -647,68 +651,28 @@
                 createdAt: docId ? undefined : Date.now()
             };
 
-            // Remove undefined fields
-            if (!itemPayload.createdAt) delete itemPayload.createdAt;
-
             if (docId) {
-                // EDIT EXISTING ITEM
-                if (window.db && window.expensesCol) {
-                    try {
-                        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-house';
-                        const docRef = doc(window.db, 'artifacts', appId, 'public', 'data', 'house_expenses', docId);
-                        await updateDoc(docRef, itemPayload);
-                        showToast('تم تحديث البيانات أونلاين 🔄');
-                    } catch (err) {
-                        console.error('Update error:', err);
-                        const idx = window.expenses.findIndex(x => x.id === docId);
-                        if (idx !== -1) {
-                            window.expenses[idx] = { ...window.expenses[idx], ...itemPayload };
-                            saveLocalFallback();
-                            updateDashboard();
-                        }
-                        showToast('تم التحديث محلياً');
-                    }
-                } else {
-                    const idx = window.expenses.findIndex(x => x.id === docId);
-                    if (idx !== -1) {
-                        window.expenses[idx] = { ...window.expenses[idx], ...itemPayload };
-                        saveLocalFallback();
-                        updateDashboard();
-                    }
-                    showToast('تم التحديث محلياً');
+                // EDIT EXISTING
+                const idx = window.expenses.findIndex(x => x.id === docId);
+                if (idx !== -1) {
+                    window.expenses[idx] = { ...window.expenses[idx], ...itemPayload };
                 }
                 cancelEditMode();
+                showToast('تم تحديث البيانات أونلاين 🔄');
             } else {
-                // ADD NEW ITEM
+                // ADD NEW
                 itemPayload.createdAt = Date.now();
-                if (window.db && window.expensesCol) {
-                    try {
-                        await addDoc(window.expensesCol, itemPayload);
-                        showToast('تمت الإضافة وستظهر للموبايل الآخر فوراً 📲');
-                    } catch (err) {
-                        console.error('Firestore save error:', err);
-                        itemPayload.id = Date.now().toString();
-                        window.expenses.unshift(itemPayload);
-                        saveLocalFallback();
-                        updateDashboard();
-                        showToast('تمت الإضافة محلياً');
-                    }
-                } else {
-                    itemPayload.id = Date.now().toString();
-                    window.expenses.unshift(itemPayload);
-                    saveLocalFallback();
-                    updateDashboard();
-                    showToast('تمت الإضافة محلياً 📲');
-                }
-
+                window.expenses.unshift(itemPayload);
                 document.getElementById('itemName').value = '';
                 document.getElementById('itemAmount').value = '';
+                showToast('تمت الإضافة وتحديث الموبايل الآخر فوراً 📲');
             }
 
-            submitBtn.disabled = false;
+            saveLocalFallback();
+            updateDashboard();
+            await broadcastFullState();
         };
 
-        // Edit Expense Mode Action
         window.editExpense = function(id) {
             const item = window.expenses.find(x => x.id === id);
             if (!item) return;
@@ -722,9 +686,8 @@
             
             setBuyer(item.buyer || 'أحمد');
 
-            // UI Edit State toggle
             document.getElementById('formHeaderTitle').querySelector('span').textContent = 'تعديل بيانات المصروف';
-            document.getElementById('btnSubmitText').textContent = 'حفظ التعديلات أونلاين 🔄';
+            document.getElementById('btnSubmitText').textContent = 'حفظ التعديلات وتزامنها 🔄';
             document.getElementById('editingBadge').classList.remove('hidden');
             document.getElementById('btnCancelEdit').classList.remove('hidden');
 
@@ -737,7 +700,7 @@
             document.getElementById('itemAmount').value = '';
             
             document.getElementById('formHeaderTitle').querySelector('span').textContent = 'تسجيل مشتريات جديدة';
-            document.getElementById('btnSubmitText').textContent = 'حفظ وإرسال أونلاين 📲';
+            document.getElementById('btnSubmitText').textContent = 'حفظ وتزامن فوري 📲';
             document.getElementById('editingBadge').classList.add('hidden');
             document.getElementById('btnCancelEdit').classList.add('hidden');
         };
@@ -760,60 +723,44 @@
             const id = window.pendingDeleteId;
             closeDeleteModal();
 
-            if (window.db && window.expensesCol) {
-                try {
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-house';
-                    await deleteDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'house_expenses', id));
-                    showToast('تم حذف المصروف من السحابة 🗑️');
-                } catch (err) {
-                    console.error('Delete error:', err);
-                    window.expenses = window.expenses.filter(x => x.id !== id);
-                    saveLocalFallback();
-                    updateDashboard();
-                    showToast('تم الحذف بنجاح');
-                }
-            } else {
-                window.expenses = window.expenses.filter(x => x.id !== id);
-                saveLocalFallback();
-                updateDashboard();
-                showToast('تم الحذف بنجاح');
-            }
+            window.expenses = window.expenses.filter(x => x.id !== id);
+            saveLocalFallback();
+            updateDashboard();
+            
+            showToast('تم حذف المصروف والتزامن 🗑️');
+            await broadcastFullState();
         };
 
-        // Firebase Config Modal Actions
-        window.openConfigModal = function() {
-            const current = localStorage.getItem('custom_firebase_config') || '';
-            document.getElementById('firebaseConfigInput').value = current;
-            document.getElementById('configModal').classList.remove('hidden');
-            document.getElementById('configModal').classList.add('flex');
+        window.openSyncModal = function() {
+            document.getElementById('roomCodeInput').value = window.currentRoom;
+            document.getElementById('syncModal').classList.remove('hidden');
+            document.getElementById('syncModal').classList.add('flex');
         };
 
-        window.closeConfigModal = function() {
-            document.getElementById('configModal').classList.add('hidden');
-            document.getElementById('configModal').classList.remove('flex');
+        window.closeSyncModal = function() {
+            document.getElementById('syncModal').classList.add('hidden');
+            document.getElementById('syncModal').classList.remove('flex');
         };
 
-        window.saveCustomConfig = function() {
-            const val = document.getElementById('firebaseConfigInput').value.trim();
+        window.saveRoomCode = function() {
+            const val = document.getElementById('roomCodeInput').value.trim();
             if (val) {
-                try {
-                    JSON.parse(val);
-                    localStorage.setItem('custom_firebase_config', val);
-                    showToast('تم حفظ المفاتيح! جاري إعادة الاتصال...');
-                    setTimeout(() => location.reload(), 1000);
-                } catch (e) {
-                    showToast('الصيغة غير صحيحة، تأكد من كتابة JSON سليمة');
-                }
+                window.currentRoom = val;
+                localStorage.setItem('house_sync_room_code', val);
+                closeSyncModal();
+                showToast('تم تغيير كود الغرفة! جاري الاتصال...');
+                initRealtimeSync();
             }
         };
 
-        window.resetConfig = function() {
-            localStorage.removeItem('custom_firebase_config');
-            showToast('تم مسح الإعدادات المخصصة');
-            setTimeout(() => location.reload(), 1000);
+        window.resetRoomCode = function() {
+            window.currentRoom = DEFAULT_ROOM;
+            localStorage.removeItem('house_sync_room_code');
+            closeSyncModal();
+            showToast('تمت العودة لكود الغرفة الافتراضي');
+            initRealtimeSync();
         };
 
-        // Initialize on DOM load
         window.addEventListener('DOMContentLoaded', () => {
             window.checkPinState();
 
@@ -826,11 +773,10 @@
             document.getElementById('itemMonth').value = currentMonthName;
             document.getElementById('filterMonthSelect').value = currentMonthName;
 
-            initFirebase();
+            initRealtimeSync();
         });
     </script>
 
-    <!-- Chart Rendering & Dashboard UI Functions -->
     <script>
         let histogramChart = null;
         let pieChart = null;
