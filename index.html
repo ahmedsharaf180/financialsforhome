@@ -514,12 +514,12 @@
             document.getElementById('pinLockModal').classList.remove('hidden');
         };
 
-        // Firebase Realtime Cloud Sync Initialization
+        // Enhanced Realtime Cloud Initialization
         async function initFirebase() {
             try {
                 let config = null;
 
-                // 1. Check custom configured config in localStorage
+                // 1. Check custom user config in localStorage
                 const customConfigStr = localStorage.getItem('custom_firebase_config');
                 if (customConfigStr) {
                     try {
@@ -529,7 +529,7 @@
                     }
                 }
 
-                // 2. Check environment injected config
+                // 2. Check injected environment firebase config
                 if (!config && typeof __firebase_config !== 'undefined' && __firebase_config) {
                     try {
                         config = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
@@ -558,7 +558,6 @@
                 }
 
                 // Shared Public Collection Path across BOTH phones (RULE 1)
-                // Path: /artifacts/{appId}/public/data/house_expenses
                 window.expensesCol = collection(window.db, 'artifacts', appId, 'public', 'data', 'house_expenses');
 
                 // Real-time Firestore Listener
@@ -568,7 +567,7 @@
                         ...d.data()
                     }));
                     
-                    // Sort in JS memory to satisfy RULE 2 (No complex server indexes required)
+                    // Sort in JS memory to satisfy RULE 2
                     window.expenses.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                     updateSyncStatus(true);
