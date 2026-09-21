@@ -58,7 +58,7 @@
             background-color: #090d16;
             color: #f8fafc;
         }
-        /* Custom Scrollbars */
+        /* Custom Scrollbar Styles */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -77,7 +77,7 @@
 </head>
 <body class="min-h-screen flex flex-col p-2 sm:p-4 gap-4 bg-slate-950 text-slate-100">
 
-    <!-- PASSWORD LOCK SCREEN OVERLAY -->
+    <!-- PASSWORD LOCK SCREEN OVERLAY (PIN: 1610) -->
     <div id="pinLockModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
             <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
@@ -88,7 +88,7 @@
             </div>
 
             <h2 class="text-xl font-black text-white mb-1">بيت أحمد وأسماء</h2>
-            <p class="text-xs text-slate-400 font-semibold mb-6">أدخل كلمة السر الخاصة للوصول للتطبيق</p>
+            <p class="text-xs text-slate-400 font-semibold mb-6">أدخل كلمة السر (1610) للوصول للتطبيق</p>
 
             <form onsubmit="handlePinSubmit(event)" class="space-y-4">
                 <div class="relative">
@@ -115,10 +115,10 @@
                     <i class="fa-solid fa-house-chimney-heart"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight">بيت أحمد وأسماء</h1>
-                    <p class="text-[11px] text-slate-400 font-semibold flex items-center gap-1.5">
+                    <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight">بيت أحمد وأسماء - دفتر المصاريف</h1>
+                    <p class="text-[11px] font-semibold flex items-center gap-1.5 mt-0.5">
                         <span id="syncStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="syncStatusText" class="text-emerald-400 font-bold">متصل بالسحابة - تزامن أونلاين لحظي بين أحمد وأسماء</span>
+                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة (تزامن لحظي مشترك بين الهاتفين)</span>
                     </p>
                 </div>
             </div>
@@ -160,7 +160,7 @@
                 <span>تصدير لإكسيل (XLSX)</span>
             </button>
 
-            <button onclick="openConfigModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="ضبط المفاتيح السحابية">
+            <button onclick="openConfigModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="إعدادات السحابة">
                 <i class="fa-solid fa-gear"></i>
             </button>
 
@@ -177,14 +177,14 @@
         <!-- Total Expense Card -->
         <div class="bg-slate-900 border border-slate-800 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between">
             <div class="flex justify-between items-center text-slate-400 mb-2">
-                <span class="text-xs font-bold">مصاريف الشهر</span>
+                <span class="text-xs font-bold">إجمالي المصاريف</span>
                 <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xs">
                     <i class="fa-solid fa-wallet text-indigo-400"></i>
                 </div>
             </div>
             <div>
                 <div class="text-xl sm:text-2xl font-black text-white tracking-tight" id="kpiTotalAmount">0 <span class="text-xs font-bold text-slate-400">ج.م</span></div>
-                <div class="text-[10px] text-slate-500 mt-0.5" id="kpiTotalSubtext">إجمالي الأصناف المسجلة</div>
+                <div class="text-[10px] text-slate-500 mt-0.5" id="kpiTotalSubtext">إجمالي الفترة المحددة</div>
             </div>
         </div>
 
@@ -219,7 +219,7 @@
         <!-- Total Items Count -->
         <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
             <div class="flex justify-between items-center text-slate-400 mb-2">
-                <span class="text-xs font-bold text-slate-300">إجمالي المشتريات</span>
+                <span class="text-xs font-bold text-slate-300">عدد المشتريات</span>
                 <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-300">
                     <i class="fa-solid fa-basket-shopping"></i>
                 </div>
@@ -259,14 +259,14 @@
                         <i class="fa-solid fa-circle-plus text-indigo-400"></i>
                         تسجيل مشتريات جديدة
                     </h2>
-                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">إدخال سحابي مباشر</span>
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">مُزامن مع الموبايل الآخر</span>
                 </div>
 
                 <form id="addExpenseForm" onsubmit="handleAddExpense(event)" class="space-y-3">
                     <!-- Item Name -->
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">اسم الغرض / المشتريات *</label>
-                        <input type="text" id="itemName" required placeholder="مثلاً: 2 كيلو لحمة، أرييل..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+                        <input type="text" id="itemName" required placeholder="مثلاً: 2 كيلو لحمة، أرييل، جبن..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
                     </div>
 
                     <!-- Amount & Date -->
@@ -276,7 +276,7 @@
                             <input type="number" step="0.5" id="itemAmount" required placeholder="0.00" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 mb-1">التاريخ</label>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">التاريخ *</label>
                             <input type="date" id="itemDate" required class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
                         </div>
                     </div>
@@ -330,7 +330,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
+                    <button type="submit" id="btnSubmitExpense" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
                         <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
                         <span>حفظ وإرسال أونلاين فوراً 📲</span>
                     </button>
@@ -412,7 +412,7 @@
 
     </main>
 
-    <!-- Custom Delete Modal (NO alert/confirm used) -->
+    <!-- Custom Delete Confirmation Modal (No browser alert/confirm used) -->
     <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 w-full max-w-sm text-center shadow-xl">
             <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl mx-auto mb-3">
@@ -427,7 +427,7 @@
         </div>
     </div>
 
-    <!-- Optional Custom Firebase Configuration Modal -->
+    <!-- Custom Firebase Configuration Modal -->
     <div id="configModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
@@ -440,12 +440,12 @@
                 </button>
             </div>
             <p class="text-xs text-slate-400 mb-3 leading-relaxed">
-                التطبيق متصل بالسحابة تلقائياً. يمكنك أيضاً إضافة مفاتيح مشروع Firebase الخاص بك إذا رغبت في ربطه بقاعدة بيانات مستقلة.
+                التطبيق يتصل بالسحابة تلقائياً عبر السيرفر. يمكنك أيضاً ربط مفاتيح مشروع Firebase الخاص بك للتحكم الكامل.
             </p>
             <textarea id="firebaseConfigInput" rows="5" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500 mb-4 placeholder:text-slate-600" dir="ltr"></textarea>
             <div class="flex gap-2">
                 <button onclick="saveCustomConfig()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl text-xs">حفظ وإعادة الاتصال</button>
-                <button onclick="resetConfig()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2 rounded-xl text-xs">استعادة الافتراضي</button>
+                <button onclick="resetConfig()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2 rounded-xl text-xs">مسح</button>
             </div>
         </div>
     </div>
@@ -469,7 +469,7 @@
         window.db = null;
         window.expensesCol = null;
 
-        // PIN Code Storage Key
+        // PIN Code Key
         const PIN_KEY = 'ahmed_asmaa_pin_unlocked';
 
         window.checkPinState = function() {
@@ -504,12 +504,12 @@
             document.getElementById('pinLockModal').classList.remove('hidden');
         };
 
-        // Firebase Setup & Realtime Cloud Sync
+        // Firebase Realtime Cloud Sync Initialization
         async function initFirebase() {
             try {
                 let config = null;
 
-                // 1. Check if user configured custom Firebase config
+                // 1. Check custom configured config in localStorage
                 const customConfigStr = localStorage.getItem('custom_firebase_config');
                 if (customConfigStr) {
                     try {
@@ -519,7 +519,7 @@
                     }
                 }
 
-                // 2. Check injected environment firebase config
+                // 2. Check environment injected config
                 if (!config && typeof __firebase_config !== 'undefined' && __firebase_config) {
                     try {
                         config = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
@@ -528,70 +528,74 @@
                     }
                 }
 
-                // 3. Robust Default Working Cloud Firebase Config Fallback if standard env is missing
                 if (!config) {
-                    config = {
-                        apiKey: "AIzaSyAsmaaAhmedHomeApp2026SyncKeyDemo",
-                        authDomain: "ahmed-asmaa-expenses.firebaseapp.com",
-                        projectId: "ahmed-asmaa-expenses",
-                        storageBucket: "ahmed-asmaa-expenses.appspot.com",
-                        messagingSenderId: "987654321012",
-                        appId: "1:987654321012:web:ahmedasmaa2026"
-                    };
+                    console.log("No remote config found, running in smart multi-tab/local memory mode");
+                    updateSyncStatus(false);
+                    loadLocalData();
+                    return;
                 }
 
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses-app';
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses';
                 const app = initializeApp(config);
                 const auth = getAuth(app);
                 window.db = getFirestore(app);
 
-                // Authenticate (RULE 3)
+                // Authenticate strictly before query (RULE 3)
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
 
-                // Shared Public Collection Path (RULE 1 & RULE 2)
+                // Shared Public Collection Path across BOTH phones (RULE 1)
+                // Path: /artifacts/{appId}/public/data/expenses
                 window.expensesCol = collection(window.db, 'artifacts', appId, 'public', 'data', 'expenses');
 
                 // Real-time Firestore Listener
                 onSnapshot(window.expensesCol, (snapshot) => {
-                    window.expenses = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
+                    window.expenses = snapshot.docs.map(d => ({
+                        id: d.id,
+                        ...d.data()
                     }));
                     
-                    // Sort in JS memory (RULE 2: No complex server queries)
+                    // Sort in JS memory to satisfy RULE 2 (No complex server indexes required)
                     window.expenses.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                     updateSyncStatus(true);
                     updateDashboard();
                 }, (error) => {
-                    console.warn('Firebase snapshot fallback mode:', error);
-                    updateSyncStatus(true); // Keep green online status active
-                    if (window.expenses.length === 0) loadInitialSeedData();
+                    console.warn('Firestore subscription fallback:', error);
+                    updateSyncStatus(false);
+                    if (window.expenses.length === 0) loadLocalData();
                 });
 
             } catch (err) {
-                console.warn('Firebase init error, using memory state:', err);
-                updateSyncStatus(true);
-                loadInitialSeedData();
+                console.warn('Firebase connection error:', err);
+                updateSyncStatus(false);
+                loadLocalData();
             }
         }
 
-        function loadInitialSeedData() {
-            if (window.expenses.length === 0) {
+        function loadLocalData() {
+            const saved = localStorage.getItem('ahmed_asmaa_local_expenses');
+            if (saved) {
+                try {
+                    window.expenses = JSON.parse(saved);
+                } catch(e) { window.expenses = []; }
+            }
+            if (!window.expenses || window.expenses.length === 0) {
                 window.expenses = [
-                    { id: '1', date: '2026-09-01', month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم بقر كاندوز', buyer: 'أحمد', amount: 750, createdAt: 1000 },
-                    { id: '2', date: '2026-09-02', month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك وجيل', buyer: 'أسماء', amount: 380, createdAt: 2000 },
-                    { id: '3', date: '2026-09-03', month: 'سبتمبر', category: 'خضروات', name: 'طماطم وبطاطس وبصل للأسبوع', buyer: 'أسماء', amount: 220, createdAt: 3000 },
-                    { id: '4', date: '2026-09-04', month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ورومي ولبتون', buyer: 'أحمد', amount: 310, createdAt: 4000 },
-                    { id: '5', date: '2026-09-05', month: 'سبتمبر', category: 'فواكه', name: 'مانجو وتفاح وموز', buyer: 'أحمد', amount: 190, createdAt: 5000 },
-                    { id: '6', date: '2026-09-06', month: 'سبتمبر', category: 'خزين مطبخ', name: 'أرز وزيت وسكر ومكرونات', buyer: 'أسماء', amount: 480, createdAt: 6000 }
+                    { id: '1', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم كاندوز', buyer: 'أحمد', amount: 750, createdAt: 1000 },
+                    { id: '2', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك', buyer: 'أسماء', amount: 380, createdAt: 2000 },
+                    { id: '3', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'خضروات', name: 'خضار وفاكهة للأسبوع', buyer: 'أسماء', amount: 250, createdAt: 3000 },
+                    { id: '4', date: new Date().toISOString().split('T')[0], month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ولبتون', buyer: 'أحمد', amount: 310, createdAt: 4000 }
                 ];
             }
             updateDashboard();
+        }
+
+        function saveLocalFallback() {
+            localStorage.setItem('ahmed_asmaa_local_expenses', JSON.stringify(window.expenses));
         }
 
         function updateSyncStatus(isOnline) {
@@ -600,11 +604,11 @@
             if (isOnline) {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 text.className = "text-emerald-400 font-bold";
-                text.textContent = "متصل بالسحابة - تزامن أونلاين لحظي بين أحمد وأسماء";
+                text.textContent = "🟢 متصل بالسحابة (تزامن لحظي مشترك بين الهاتفين)";
             } else {
-                dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-                text.className = "text-emerald-400 font-bold";
-                text.textContent = "متصل بالسحابة - تزامن أونلاين لحظي بين أحمد وأسماء";
+                dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-500";
+                text.className = "text-amber-400 font-bold";
+                text.textContent = "🟡 وضع التخزين المحلي (اضغط ⚙️ لربط السحابة)";
             }
         }
 
@@ -629,25 +633,32 @@
                 createdAt: Date.now()
             };
 
+            const submitBtn = document.getElementById('btnSubmitExpense');
+            submitBtn.disabled = true;
+
             if (window.db && window.expensesCol) {
                 try {
                     await addDoc(window.expensesCol, newItem);
+                    showToast('تمت الإضافة وستظهر على موبايل الطرف الآخر فوراً 📲');
                 } catch (err) {
-                    console.error('Error sending doc to Firebase:', err);
+                    console.error('Firestore save error:', err);
                     newItem.id = Date.now().toString();
                     window.expenses.unshift(newItem);
+                    saveLocalFallback();
                     updateDashboard();
+                    showToast('تمت الإضافة محلياً');
                 }
             } else {
                 newItem.id = Date.now().toString();
                 window.expenses.unshift(newItem);
+                saveLocalFallback();
                 updateDashboard();
+                showToast('تمت الإضافة محلياً 📲');
             }
 
+            submitBtn.disabled = false;
             document.getElementById('itemName').value = '';
             document.getElementById('itemAmount').value = '';
-
-            showToast('تمت الإضافة وستظهر على موبايل الطرف الآخر فوراً 📲');
         };
 
         window.openDeleteModal = function(id) {
@@ -670,19 +681,22 @@
 
             if (window.db && window.expensesCol) {
                 try {
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses-app';
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses';
                     await deleteDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'expenses', id));
+                    showToast('تم حذف المصروف من السحابة 🗑️');
                 } catch (err) {
                     console.error('Delete error:', err);
                     window.expenses = window.expenses.filter(x => x.id !== id);
+                    saveLocalFallback();
                     updateDashboard();
+                    showToast('تم الحذف بنجاح');
                 }
             } else {
                 window.expenses = window.expenses.filter(x => x.id !== id);
+                saveLocalFallback();
                 updateDashboard();
+                showToast('تم الحذف بنجاح');
             }
-
-            showToast('تم حذف المصروف من السحابة 🗑️');
         };
 
         // Firebase Config Modal Actions
@@ -704,7 +718,7 @@
                 try {
                     JSON.parse(val);
                     localStorage.setItem('custom_firebase_config', val);
-                    showToast('تم حفظ المفاتيح! جاري إعادة التحميل...');
+                    showToast('تم حفظ المفاتيح! جاري إعادة الاتصال...');
                     setTimeout(() => location.reload(), 1000);
                 } catch (e) {
                     showToast('الصيغة غير صحيحة، تأكد من كتابة JSON سليمة');
@@ -714,11 +728,11 @@
 
         window.resetConfig = function() {
             localStorage.removeItem('custom_firebase_config');
-            showToast('تمت استعادة الإعدادات الافتراضية');
+            showToast('تم مسح الإعدادات المخصصة');
             setTimeout(() => location.reload(), 1000);
         };
 
-        // Initialize on load
+        // Initialize on DOM load
         window.addEventListener('DOMContentLoaded', () => {
             window.checkPinState();
 
@@ -812,7 +826,7 @@
                 }
             });
 
-            // Update KPI Texts
+            // Update KPI Displays
             document.getElementById('kpiTotalAmount').textContent = total.toLocaleString('ar-EG');
             document.getElementById('kpiAhmedAmount').textContent = ahmedTotal.toLocaleString('ar-EG');
             document.getElementById('kpiAhmedCount').textContent = `${ahmedCount} مشتريات`;
@@ -829,7 +843,7 @@
             document.getElementById('kpiAhmedBadge').textContent = `${ahmedPct}%`;
             document.getElementById('kpiAsmaaBadge').textContent = `${asmaaPct}%`;
 
-            // Top Category
+            // Top Category calculation
             let topCat = 'لا يوجد';
             let maxAmt = 0;
             Object.keys(catTotals).forEach(cat => {
@@ -984,7 +998,7 @@
                         <td class="p-2.5">${buyerBadge}</td>
                         <td class="p-2.5 font-black text-slate-100">${item.amount} <span class="text-[10px] text-slate-400">ج.م</span></td>
                         <td class="p-2.5 text-center">
-                            <button onclick="openDeleteModal('${item.id}')" class="w-6 h-6 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 inline-flex items-center justify-center transition-all">
+                            <button onclick="openDeleteModal('${item.id}')" class="w-6 h-6 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 inline-flex items-center justify-center transition-all" title="حذف">
                                 <i class="fa-solid fa-xmark text-xs"></i>
                             </button>
                         </td>
