@@ -57,6 +57,7 @@
             font-family: 'Cairo', sans-serif;
             background-color: #090d16;
             color: #f8fafc;
+            user-select: none;
         }
         /* Custom Scrollbar Styles */
         ::-webkit-scrollbar {
@@ -75,7 +76,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-2 sm:p-4 gap-4 bg-slate-950 text-slate-100">
+<body class="min-h-screen flex flex-col p-2 sm:p-4 gap-4 bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
 
     <!-- PASSWORD LOCK SCREEN OVERLAY (PIN: 1610) -->
     <div id="pinLockModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
@@ -88,7 +89,7 @@
             </div>
 
             <h2 class="text-xl font-black text-white mb-1">بيت أحمد وأسماء</h2>
-            <p class="text-xs text-slate-400 font-semibold mb-6">أدخل كلمة السر (1610) للوصول للتطبيق</p>
+            <p class="text-xs text-slate-400 font-semibold mb-6">أدخل الرقم السري (1610) لفتح دفتر المصاريف</p>
 
             <form onsubmit="handlePinSubmit(event)" class="space-y-4">
                 <div class="relative">
@@ -97,7 +98,7 @@
 
                 <div id="pinErrorMsg" class="text-xs text-rose-400 font-bold hidden flex items-center justify-center gap-1">
                     <i class="fa-solid fa-circle-exclamation"></i>
-                    <span>كلمة السر غير صحيحة، حاول مجدداً</span>
+                    <span>الرقم السري غير صحيح، حاول مجدداً</span>
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-rose-600 hover:opacity-90 text-white font-extrabold py-3 rounded-2xl shadow-lg transition-all active:scale-98 text-sm">
@@ -118,7 +119,7 @@
                     <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight">بيت أحمد وأسماء - دفتر المصاريف</h1>
                     <p class="text-[11px] font-semibold flex items-center gap-1.5 mt-0.5">
                         <span id="syncStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة (تزامن لحظي مشترك بين الهاتفين)</span>
+                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة - تزامن أونلاين بين أحمد وأسماء</span>
                     </p>
                 </div>
             </div>
@@ -157,7 +158,7 @@
 
             <button onclick="exportToExcel()" class="bg-emerald-600/90 hover:bg-emerald-600 active:scale-95 text-white text-xs font-extrabold py-2 px-3.5 rounded-xl border border-emerald-500/30 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
                 <i class="fa-solid fa-file-excel text-sm"></i>
-                <span>تصدير لإكسيل (XLSX)</span>
+                <span>تصدير إكسيل (XLSX)</span>
             </button>
 
             <button onclick="openConfigModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="إعدادات السحابة">
@@ -189,7 +190,7 @@
         </div>
 
         <!-- Ahmed Card -->
-        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-ahmed-500/20 flex flex-col justify-between relative overflow-hidden">
+        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-ahmed-500/30 flex flex-col justify-between relative overflow-hidden">
             <div class="flex justify-between items-center text-slate-400 mb-2">
                 <span class="text-xs font-bold text-ahmed-400 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-large text-ahmed-500"></i> دفعه أحمد
@@ -203,7 +204,7 @@
         </div>
 
         <!-- Asmaa Card -->
-        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-asmaa-500/20 flex flex-col justify-between relative overflow-hidden">
+        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-asmaa-500/30 flex flex-col justify-between relative overflow-hidden">
             <div class="flex justify-between items-center text-slate-400 mb-2">
                 <span class="text-xs font-bold text-asmaa-400 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-large text-asmaa-500"></i> دفعتها أسماء
@@ -226,7 +227,7 @@
             </div>
             <div>
                 <div class="text-xl font-black text-slate-100 tracking-tight" id="kpiTotalCount">0</div>
-                <div class="text-[10px] text-slate-500 mt-0.5">عمليات شراء ناجحة</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">عمليات ناجحة</div>
             </div>
         </div>
 
@@ -252,17 +253,20 @@
         <!-- LEFT COLUMN: INPUT FORM & CATEGORY PIE CHART (lg:col-span-4) -->
         <div class="lg:col-span-4 flex flex-col gap-4">
             
-            <!-- Quick Add Expense Form -->
-            <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800">
+            <!-- Quick Add / Edit Expense Form -->
+            <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 relative">
+                
                 <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
-                    <h2 class="font-extrabold text-white text-sm flex items-center gap-2">
+                    <h2 class="font-extrabold text-white text-sm flex items-center gap-2" id="formHeaderTitle">
                         <i class="fa-solid fa-circle-plus text-indigo-400"></i>
-                        تسجيل مشتريات جديدة
+                        <span>تسجيل مشتريات جديدة</span>
                     </h2>
-                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">مُزامن مع الموبايل الآخر</span>
+                    <span id="editingBadge" class="hidden text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">وضع التعديل ✏️</span>
                 </div>
 
-                <form id="addExpenseForm" onsubmit="handleAddExpense(event)" class="space-y-3">
+                <form id="addExpenseForm" onsubmit="handleFormSubmit(event)" class="space-y-3">
+                    <input type="hidden" id="editingDocId" value="">
+
                     <!-- Item Name -->
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">اسم الغرض / المشتريات *</label>
@@ -330,10 +334,16 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="btnSubmitExpense" class="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
-                        <span>حفظ وإرسال أونلاين فوراً 📲</span>
-                    </button>
+                    <div class="flex gap-2 pt-1">
+                        <button type="submit" id="btnSubmitExpense" class="flex-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                            <span id="btnSubmitText">حفظ وإرسال أونلاين 📲</span>
+                        </button>
+                        
+                        <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs transition-all">
+                            إلغاء
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -342,7 +352,7 @@
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="font-extrabold text-white text-xs flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie text-rose-400"></i>
-                        النسبة المئوية للأقسام (Pie Chart)
+                        النسب المئوية للأقسام (Pie Chart)
                     </h3>
                     <span class="text-[10px] text-slate-400">توزيع المصاريف</span>
                 </div>
@@ -364,7 +374,7 @@
                             <i class="fa-solid fa-chart-column text-indigo-400"></i>
                             هيستوجرام المصاريف حسب الأقسام
                         </h3>
-                        <p class="text-[10px] text-slate-400">تكلفة كل قسم بالجنيه المصري للشهر المحدد</p>
+                        <p class="text-[10px] text-slate-400">تكلفة كل قسم بالجنيه المصري للفترة المحددة</p>
                     </div>
                 </div>
 
@@ -398,7 +408,7 @@
                                 <th class="p-2.5">السلعة / البيان</th>
                                 <th class="p-2.5">المشتري</th>
                                 <th class="p-2.5">المبلغ</th>
-                                <th class="p-2.5 text-center rounded-l-xl">حذف</th>
+                                <th class="p-2.5 text-center rounded-l-xl">إجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="transactionsTableBody" class="divide-y divide-slate-800 text-slate-200">
@@ -412,7 +422,7 @@
 
     </main>
 
-    <!-- Custom Delete Confirmation Modal (No browser alert/confirm used) -->
+    <!-- Custom Delete Confirmation Modal -->
     <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 w-full max-w-sm text-center shadow-xl">
             <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl mx-auto mb-3">
@@ -440,7 +450,7 @@
                 </button>
             </div>
             <p class="text-xs text-slate-400 mb-3 leading-relaxed">
-                التطبيق يتصل بالسحابة تلقائياً عبر السيرفر. يمكنك أيضاً ربط مفاتيح مشروع Firebase الخاص بك للتحكم الكامل.
+                التطبيق يتصل بالسحابة تلقائياً لتزامن الموبايلين. يمكنك أيضاً وضع المفاتيح الخاصة بمشروعك في Firebase للتحكم الكامل.
             </p>
             <textarea id="firebaseConfigInput" rows="5" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500 mb-4 placeholder:text-slate-600" dir="ltr"></textarea>
             <div class="flex gap-2">
@@ -460,7 +470,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global State Variables
         window.expenses = [];
@@ -470,7 +480,7 @@
         window.expensesCol = null;
 
         // PIN Code Key
-        const PIN_KEY = 'ahmed_asmaa_pin_unlocked';
+        const PIN_KEY = 'house_expenses_pin_unlocked';
 
         window.checkPinState = function() {
             const isUnlocked = localStorage.getItem(PIN_KEY) === 'true';
@@ -492,7 +502,7 @@
                 document.getElementById('pinLockModal').classList.add('hidden');
                 document.getElementById('pinInput').value = '';
                 errEl.classList.add('hidden');
-                showToast('أهلاً بكما في دفتر البيت 🏠');
+                showToast('أهلاً بكما في دفتر المصاريف 🏠');
             } else {
                 errEl.classList.remove('hidden');
                 document.getElementById('pinInput').value = '';
@@ -529,13 +539,13 @@
                 }
 
                 if (!config) {
-                    console.log("No remote config found, running in smart multi-tab/local memory mode");
+                    console.log("Running in offline fallback mode");
                     updateSyncStatus(false);
                     loadLocalData();
                     return;
                 }
 
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses';
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-house';
                 const app = initializeApp(config);
                 const auth = getAuth(app);
                 window.db = getFirestore(app);
@@ -548,8 +558,8 @@
                 }
 
                 // Shared Public Collection Path across BOTH phones (RULE 1)
-                // Path: /artifacts/{appId}/public/data/expenses
-                window.expensesCol = collection(window.db, 'artifacts', appId, 'public', 'data', 'expenses');
+                // Path: /artifacts/{appId}/public/data/house_expenses
+                window.expensesCol = collection(window.db, 'artifacts', appId, 'public', 'data', 'house_expenses');
 
                 // Real-time Firestore Listener
                 onSnapshot(window.expensesCol, (snapshot) => {
@@ -577,7 +587,7 @@
         }
 
         function loadLocalData() {
-            const saved = localStorage.getItem('ahmed_asmaa_local_expenses');
+            const saved = localStorage.getItem('house_expenses_local_data');
             if (saved) {
                 try {
                     window.expenses = JSON.parse(saved);
@@ -595,7 +605,7 @@
         }
 
         function saveLocalFallback() {
-            localStorage.setItem('ahmed_asmaa_local_expenses', JSON.stringify(window.expenses));
+            localStorage.setItem('house_expenses_local_data', JSON.stringify(window.expenses));
         }
 
         function updateSyncStatus(isOnline) {
@@ -604,7 +614,7 @@
             if (isOnline) {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 text.className = "text-emerald-400 font-bold";
-                text.textContent = "🟢 متصل بالسحابة (تزامن لحظي مشترك بين الهاتفين)";
+                text.textContent = "🟢 متصل بالسحابة - تزامن أونلاين بين أحمد وأسماء";
             } else {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-500";
                 text.className = "text-amber-400 font-bold";
@@ -612,9 +622,11 @@
             }
         }
 
-        window.handleAddExpense = async function(e) {
+        // Handle Add or Edit Form Submission
+        window.handleFormSubmit = async function(e) {
             e.preventDefault();
 
+            const docId = document.getElementById('editingDocId').value;
             const name = document.getElementById('itemName').value.trim();
             const amount = parseFloat(document.getElementById('itemAmount').value);
             const date = document.getElementById('itemDate').value;
@@ -623,42 +635,112 @@
 
             if (!name || isNaN(amount) || amount <= 0) return;
 
-            const newItem = {
+            const submitBtn = document.getElementById('btnSubmitExpense');
+            submitBtn.disabled = true;
+
+            const itemPayload = {
                 name,
                 amount,
                 date,
                 category,
                 month,
                 buyer: window.currentBuyer,
-                createdAt: Date.now()
+                createdAt: docId ? undefined : Date.now()
             };
 
-            const submitBtn = document.getElementById('btnSubmitExpense');
-            submitBtn.disabled = true;
+            // Remove undefined fields
+            if (!itemPayload.createdAt) delete itemPayload.createdAt;
 
-            if (window.db && window.expensesCol) {
-                try {
-                    await addDoc(window.expensesCol, newItem);
-                    showToast('تمت الإضافة وستظهر على موبايل الطرف الآخر فوراً 📲');
-                } catch (err) {
-                    console.error('Firestore save error:', err);
-                    newItem.id = Date.now().toString();
-                    window.expenses.unshift(newItem);
+            if (docId) {
+                // EDIT EXISTING ITEM
+                if (window.db && window.expensesCol) {
+                    try {
+                        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-house';
+                        const docRef = doc(window.db, 'artifacts', appId, 'public', 'data', 'house_expenses', docId);
+                        await updateDoc(docRef, itemPayload);
+                        showToast('تم تحديث البيانات أونلاين 🔄');
+                    } catch (err) {
+                        console.error('Update error:', err);
+                        const idx = window.expenses.findIndex(x => x.id === docId);
+                        if (idx !== -1) {
+                            window.expenses[idx] = { ...window.expenses[idx], ...itemPayload };
+                            saveLocalFallback();
+                            updateDashboard();
+                        }
+                        showToast('تم التحديث محلياً');
+                    }
+                } else {
+                    const idx = window.expenses.findIndex(x => x.id === docId);
+                    if (idx !== -1) {
+                        window.expenses[idx] = { ...window.expenses[idx], ...itemPayload };
+                        saveLocalFallback();
+                        updateDashboard();
+                    }
+                    showToast('تم التحديث محلياً');
+                }
+                cancelEditMode();
+            } else {
+                // ADD NEW ITEM
+                itemPayload.createdAt = Date.now();
+                if (window.db && window.expensesCol) {
+                    try {
+                        await addDoc(window.expensesCol, itemPayload);
+                        showToast('تمت الإضافة وستظهر للموبايل الآخر فوراً 📲');
+                    } catch (err) {
+                        console.error('Firestore save error:', err);
+                        itemPayload.id = Date.now().toString();
+                        window.expenses.unshift(itemPayload);
+                        saveLocalFallback();
+                        updateDashboard();
+                        showToast('تمت الإضافة محلياً');
+                    }
+                } else {
+                    itemPayload.id = Date.now().toString();
+                    window.expenses.unshift(itemPayload);
                     saveLocalFallback();
                     updateDashboard();
-                    showToast('تمت الإضافة محلياً');
+                    showToast('تمت الإضافة محلياً 📲');
                 }
-            } else {
-                newItem.id = Date.now().toString();
-                window.expenses.unshift(newItem);
-                saveLocalFallback();
-                updateDashboard();
-                showToast('تمت الإضافة محلياً 📲');
+
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemAmount').value = '';
             }
 
             submitBtn.disabled = false;
+        };
+
+        // Edit Expense Mode Action
+        window.editExpense = function(id) {
+            const item = window.expenses.find(x => x.id === id);
+            if (!item) return;
+
+            document.getElementById('editingDocId').value = item.id;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemAmount').value = item.amount;
+            document.getElementById('itemDate').value = item.date;
+            document.getElementById('itemCategory').value = item.category;
+            document.getElementById('itemMonth').value = item.month;
+            
+            setBuyer(item.buyer || 'أحمد');
+
+            // UI Edit State toggle
+            document.getElementById('formHeaderTitle').querySelector('span').textContent = 'تعديل بيانات المصروف';
+            document.getElementById('btnSubmitText').textContent = 'حفظ التعديلات أونلاين 🔄';
+            document.getElementById('editingBadge').classList.remove('hidden');
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.cancelEditMode = function() {
+            document.getElementById('editingDocId').value = '';
             document.getElementById('itemName').value = '';
             document.getElementById('itemAmount').value = '';
+            
+            document.getElementById('formHeaderTitle').querySelector('span').textContent = 'تسجيل مشتريات جديدة';
+            document.getElementById('btnSubmitText').textContent = 'حفظ وإرسال أونلاين 📲';
+            document.getElementById('editingBadge').classList.add('hidden');
+            document.getElementById('btnCancelEdit').classList.add('hidden');
         };
 
         window.openDeleteModal = function(id) {
@@ -681,8 +763,8 @@
 
             if (window.db && window.expensesCol) {
                 try {
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-expenses';
-                    await deleteDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'expenses', id));
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'ahmed-asmaa-house';
+                    await deleteDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'house_expenses', id));
                     showToast('تم حذف المصروف من السحابة 🗑️');
                 } catch (err) {
                     console.error('Delete error:', err);
@@ -997,10 +1079,15 @@
                         <td class="p-2.5 font-extrabold text-white">${escapeHtml(item.name)}</td>
                         <td class="p-2.5">${buyerBadge}</td>
                         <td class="p-2.5 font-black text-slate-100">${item.amount} <span class="text-[10px] text-slate-400">ج.م</span></td>
-                        <td class="p-2.5 text-center">
-                            <button onclick="openDeleteModal('${item.id}')" class="w-6 h-6 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 inline-flex items-center justify-center transition-all" title="حذف">
-                                <i class="fa-solid fa-xmark text-xs"></i>
-                            </button>
+                        <td class="p-2.5 text-center whitespace-nowrap">
+                            <div class="inline-flex items-center gap-1">
+                                <button onclick="editExpense('${item.id}')" class="w-6 h-6 rounded-md text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 inline-flex items-center justify-center transition-all" title="تعديل">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+                                <button onclick="openDeleteModal('${item.id}')" class="w-6 h-6 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 inline-flex items-center justify-center transition-all" title="حذف">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1020,7 +1107,7 @@
 
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "مصاريف أحمد وأسماء");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "مصاريف بيت أحمد وأسماء");
 
             if (!workbook.Workbook) workbook.Workbook = {};
             if (!workbook.Workbook.Views) workbook.Workbook.Views = [{}];
