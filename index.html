@@ -2,9 +2,21 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>بيت أحمد وأسماء - دفتر المصاريف</title>
     
+    <!-- PWA & Mobile Native App Metas -->
+    <meta name="theme-color" content="#090d16">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مصاريف البيت">
+    <meta name="application-name" content="مصاريف البيت">
+
+    <!-- App Icon (SVG Data URI) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%230f172a'/><path d='M256 100 L380 200 L380 380 L132 380 L132 200 Z' fill='%233b82f6'/><path d='M256 100 L380 200 L256 220 L132 200 Z' fill='%2360a5fa'/><path d='M220 280 H292 V380 H220 Z' fill='%23f43f5e'/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%230f172a'/><path d='M256 100 L380 200 L380 380 L132 380 L132 200 Z' fill='%233b82f6'/><path d='M256 100 L380 200 L256 220 L132 200 Z' fill='%2360a5fa'/><path d='M220 280 H292 V380 H220 Z' fill='%23f43f5e'/></svg>">
+
     <!-- Google Fonts - Cairo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,10 +70,13 @@
             background-color: #090d16;
             color: #f8fafc;
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
             background: #1e293b;
@@ -73,9 +88,12 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #64748b;
         }
+        input, select, button {
+            -webkit-appearance: none;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-2 sm:p-4 gap-4 bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen flex flex-col p-2 sm:p-4 gap-3 bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white pb-20 sm:pb-4">
 
     <!-- PASSWORD LOCK SCREEN OVERLAY (PIN: 1610) -->
     <div id="pinLockModal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
@@ -88,7 +106,7 @@
             </div>
 
             <h2 class="text-xl font-black text-white mb-1">بيت أحمد وأسماء</h2>
-            <p class="text-xs text-slate-400 font-semibold mb-6">أدخل الرقم السري (1610) لفتح دفتر المصاريف</p>
+            <p class="text-xs text-slate-400 font-semibold mb-6">أدخل الرقم السري (1610) لفتح التطبيق</p>
 
             <form onsubmit="handlePinSubmit(event)" class="space-y-4">
                 <div class="relative">
@@ -100,15 +118,35 @@
                     <span>الرقم السري غير صحيح، حاول مجدداً</span>
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-rose-600 hover:opacity-90 text-white font-extrabold py-3 rounded-2xl shadow-lg transition-all active:scale-98 text-sm">
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-rose-600 hover:opacity-90 text-white font-extrabold py-3 rounded-2xl shadow-lg transition-all active:scale-95 text-sm">
                     تأكيد وإلغاء القفل <i class="fa-solid fa-key mr-1"></i>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- TOP HEADER BAR -->
-    <header class="bg-slate-900/90 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 shadow-lg">
+    <!-- PWA INSTALL PROMPT BAR -->
+    <div id="pwaInstallBanner" class="bg-gradient-to-r from-indigo-900/90 via-slate-900 to-rose-900/90 border border-indigo-500/30 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-xl shrink-0">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-400/30 flex items-center justify-center text-indigo-300 font-bold">
+                <i class="fa-solid fa-mobile-screen-button text-base"></i>
+            </div>
+            <div>
+                <h4 class="text-xs font-black text-white">تثبيت التطبيق على الشاشة الرئيسية</h4>
+                <p class="text-[10px] text-slate-300">لتصفحه كأنه تطبيق موبايل بدون متصفح</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <button onclick="openInstallInstructions()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition-all active:scale-95 shadow-md">
+                تثبيت 📲
+            </button>
+            <button onclick="dismissPwaBanner()" class="text-slate-400 hover:text-white p-1 text-xs">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <header class="bg-slate-900/90 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 shrink-0 shadow-lg">
         <div class="flex items-center justify-between w-full md:w-auto">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-rose-500 flex items-center justify-center text-white shadow-md text-xl font-bold">
@@ -124,13 +162,13 @@
             </div>
 
             <div class="flex items-center gap-1.5 md:hidden">
-                <button onclick="manualSyncFromCloud()" class="bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/40 text-xs font-bold" title="إعادة جلب البيانات">
+                <button onclick="manualSyncFromCloud()" class="bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/40 text-xs font-bold active:scale-95 transition-all" title="إعادة جلب البيانات">
                     <i class="fa-solid fa-rotate"></i>
                 </button>
-                <button onclick="openSyncModal()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="إعدادات الغرفة">
+                <button onclick="openSyncModal()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold active:scale-95 transition-all" title="إعدادات الغرفة">
                     <i class="fa-solid fa-wifi"></i>
                 </button>
-                <button onclick="lockApp()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="قفل">
+                <button onclick="lockApp()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold active:scale-95 transition-all" title="قفل">
                     <i class="fa-solid fa-lock"></i>
                 </button>
             </div>
@@ -158,7 +196,7 @@
                 </select>
             </div>
 
-            <button onclick="manualSyncFromCloud()" class="hidden md:flex bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/30 text-xs font-bold items-center gap-1.5 transition-all" title="تحديث وتنشيط البيانات من السحابة">
+            <button onclick="manualSyncFromCloud()" class="hidden md:flex bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/30 text-xs font-bold items-center gap-1.5 transition-all active:scale-95" title="تحديث وتنشيط البيانات من السحابة">
                 <i class="fa-solid fa-rotate text-indigo-400"></i>
                 <span>تحديث</span>
             </button>
@@ -168,26 +206,25 @@
                 <span>تصدير (XLSX)</span>
             </button>
 
-            <button onclick="openSyncModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="إعدادات الغرفة السحابية">
+            <button onclick="openSyncModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all active:scale-95" title="إعدادات الغرفة السحابية">
                 <i class="fa-solid fa-wifi text-indigo-400"></i>
                 <span>كود الغرفة</span>
             </button>
 
-            <button onclick="lockApp()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="قفل التطبيق">
+            <button onclick="lockApp()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all active:scale-95" title="قفل التطبيق">
                 <i class="fa-solid fa-lock"></i>
                 <span>قفل</span>
             </button>
         </div>
     </header>
 
-    <!-- KPI OVERVIEW STATS CARDS GRID -->
     <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shrink-0">
         
         <!-- Total Expense Card -->
-        <div class="bg-slate-900 border border-slate-800 text-white p-4 rounded-2xl shadow-sm flex flex-col justify-between">
-            <div class="flex justify-between items-center text-slate-400 mb-2">
+        <div class="bg-slate-900 border border-slate-800 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 mb-1.5">
                 <span class="text-xs font-bold">إجمالي المصاريف</span>
-                <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xs">
+                <div class="w-7 h-7 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xs">
                     <i class="fa-solid fa-wallet text-indigo-400"></i>
                 </div>
             </div>
@@ -198,8 +235,8 @@
         </div>
 
         <!-- Ahmed Card -->
-        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-ahmed-500/30 flex flex-col justify-between relative overflow-hidden">
-            <div class="flex justify-between items-center text-slate-400 mb-2">
+        <div class="bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-ahmed-500/30 flex flex-col justify-between relative overflow-hidden">
+            <div class="flex justify-between items-center text-slate-400 mb-1.5">
                 <span class="text-xs font-bold text-ahmed-400 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-large text-ahmed-500"></i> دفعه أحمد
                 </span>
@@ -212,8 +249,8 @@
         </div>
 
         <!-- Asmaa Card -->
-        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-asmaa-500/30 flex flex-col justify-between relative overflow-hidden">
-            <div class="flex justify-between items-center text-slate-400 mb-2">
+        <div class="bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-asmaa-500/30 flex flex-col justify-between relative overflow-hidden">
+            <div class="flex justify-between items-center text-slate-400 mb-1.5">
                 <span class="text-xs font-bold text-asmaa-400 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-large text-asmaa-500"></i> دفعتها أسماء
                 </span>
@@ -226,10 +263,10 @@
         </div>
 
         <!-- Total Items Count -->
-        <div class="bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
-            <div class="flex justify-between items-center text-slate-400 mb-2">
+        <div class="bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 mb-1.5">
                 <span class="text-xs font-bold text-slate-300">عدد المشتريات</span>
-                <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-300">
+                <div class="w-7 h-7 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-300">
                     <i class="fa-solid fa-basket-shopping"></i>
                 </div>
             </div>
@@ -240,10 +277,10 @@
         </div>
 
         <!-- Top Category Card -->
-        <div class="col-span-2 sm:col-span-1 bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
-            <div class="flex justify-between items-center text-slate-400 mb-2">
+        <div class="col-span-2 sm:col-span-1 bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-slate-800 flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400 mb-1.5">
                 <span class="text-xs font-bold text-slate-300">الأعلى استهلاكاً</span>
-                <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xs">
+                <div class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xs">
                     <i class="fa-solid fa-crown"></i>
                 </div>
             </div>
@@ -258,7 +295,6 @@
     <!-- MAIN DASHBOARD GRID -->
     <main class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
         
-        <!-- LEFT COLUMN: INPUT FORM & CATEGORY PIE CHART (lg:col-span-4) -->
         <div class="lg:col-span-4 flex flex-col gap-4">
             
             <!-- Quick Add / Edit Expense Form -->
@@ -278,7 +314,7 @@
                     <!-- Item Name -->
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">اسم الغرض / المشتريات *</label>
-                        <input type="text" id="itemName" required placeholder="مثلاً: 2 كيلو لحمة، أرييل، جبن..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+                        <input type="text" id="itemName" required placeholder="مثلاً: بومبرز لعمر، ربع بن، نسكافيه، لحم..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
                     </div>
 
                     <!-- Amount & Date -->
@@ -297,10 +333,10 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1">مين اللي دفع؟ *</label>
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="setBuyer('أحمد')" id="btnBuyerAhmed" class="buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-ahmed-500 bg-ahmed-600 text-white shadow-sm transition-all">
+                            <button type="button" onclick="setBuyer('أحمد')" id="btnBuyerAhmed" class="buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-ahmed-500 bg-ahmed-600 text-white shadow-sm transition-all active:scale-95">
                                 <i class="fa-solid fa-user-large"></i> أحمد
                             </button>
-                            <button type="button" onclick="setBuyer('أسماء')" id="btnBuyerAsmaa" class="buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all">
+                            <button type="button" onclick="setBuyer('أسماء')" id="btnBuyerAsmaa" class="buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all active:scale-95">
                                 <i class="fa-solid fa-user-large"></i> أسماء
                             </button>
                         </div>
@@ -311,14 +347,20 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-300 mb-1">القسم *</label>
                             <select id="itemCategory" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                <option value="مستلزمات عمر">👶 مستلزمات عمر</option>
+                                <option value="مشروبات وبن">☕ مشروبات وبن</option>
                                 <option value="منظفات">🧼 منظفات</option>
-                                <option value="لحوم">🥩 لحوم</option>
+                                <option value="لحوم">🥩 لحوم وطيور</option>
                                 <option value="خضروات">🥕 خضروات</option>
                                 <option value="فواكه">🍎 فواكه</option>
                                 <option value="ورقيات">🌿 ورقيات</option>
                                 <option value="بهارات">🌶️ بهارات</option>
                                 <option value="خزين مطبخ">📦 خزين مطبخ</option>
                                 <option value="مستلزمات للفطار">🍳 مستلزمات للفطار</option>
+                                <option value="صيدلية وأدوية">💊 صيدلية وأدوية</option>
+                                <option value="فواتير ومرافق">💡 فواتير ومرافق</option>
+                                <option value="حلويات وسناكس">🍪 حلويات وسناكس</option>
+                                <option value="صيانة وتجهيزات">🛠️ صيانة وتجهيزات</option>
                                 <option value="أخرى">🛍️ أخرى</option>
                             </select>
                         </div>
@@ -343,12 +385,12 @@
                     </div>
 
                     <div class="flex gap-2 pt-1">
-                        <button type="submit" id="btnSubmitExpense" class="flex-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
+                        <button type="submit" id="btnSubmitExpense" class="flex-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-95 text-xs flex items-center justify-center gap-2">
                             <i class="fa-solid fa-paper-plane text-sm"></i>
                             <span id="btnSubmitText">حفظ وتزامن دائم 📲</span>
                         </button>
                         
-                        <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs transition-all">
+                        <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs transition-all active:scale-95">
                             إلغاء
                         </button>
                     </div>
@@ -364,14 +406,13 @@
                     </h3>
                     <span class="text-[10px] text-slate-400">توزيع المصاريف</span>
                 </div>
-                <div class="relative h-52 w-full flex items-center justify-center">
+                <div class="relative h-56 w-full flex items-center justify-center">
                     <canvas id="categoryPieChart"></canvas>
                 </div>
             </div>
 
         </div>
 
-        <!-- RIGHT COLUMN: HISTOGRAM & TRANSACTIONS TABLE (lg:col-span-8) -->
         <div class="lg:col-span-8 flex flex-col gap-4">
             
             <!-- Histogram Bar Chart Card -->
@@ -386,7 +427,7 @@
                     </div>
                 </div>
 
-                <div class="relative h-56 w-full">
+                <div class="relative h-52 w-full">
                     <canvas id="categoryHistogramChart"></canvas>
                 </div>
             </div>
@@ -430,6 +471,68 @@
 
     </main>
 
+    <div class="md:hidden fixed bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur-lg border border-slate-700/80 rounded-2xl p-2.5 flex items-center justify-around z-40 shadow-2xl">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
+            <i class="fa-solid fa-plus-circle text-indigo-400 text-base"></i>
+            <span>إضافة</span>
+        </button>
+        <button onclick="manualSyncFromCloud()" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
+            <i class="fa-solid fa-rotate text-emerald-400 text-base"></i>
+            <span>تحديث</span>
+        </button>
+        <button onclick="exportToExcel()" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
+            <i class="fa-solid fa-file-excel text-amber-400 text-base"></i>
+            <span>إكسيل</span>
+        </button>
+        <button onclick="lockApp()" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
+            <i class="fa-solid fa-lock text-rose-400 text-base"></i>
+            <span>قفل</span>
+        </button>
+    </div>
+
+    <!-- PWA Install Modal Instructions -->
+    <div id="pwaInstallModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative text-slate-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                <h3 class="font-black text-white text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button text-indigo-400"></i>
+                    تثبيت التطبيق على الموبايل
+                </h3>
+                <button onclick="closeInstallInstructions()" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
+                    <h4 class="font-extrabold text-indigo-300 mb-1 flex items-center gap-1.5">
+                        <i class="fa-brands fa-apple"></i> لمستخدمي آيفون (Safari):
+                    </h4>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300 font-semibold">
+                        <li>اضغط على زر المشاركة <i class="fa-solid fa-arrow-up-from-bracket text-indigo-400 mx-1"></i> أسفل الشاشة.</li>
+                        <li>اختر <strong class="text-white">"إضافة إلى الشاشة الرئيسية" (Add to Home Screen)</strong>.</li>
+                        <li>اضغط <strong class="text-indigo-400">إضافة (Add)</strong> بالأعلى.</li>
+                    </ol>
+                </div>
+
+                <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
+                    <h4 class="font-extrabold text-emerald-300 mb-1 flex items-center gap-1.5">
+                        <i class="fa-brands fa-android"></i> لمستخدمي أندرويد (Chrome):
+                    </h4>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-300 font-semibold">
+                        <li>اضغط على الثلاث نقاط <i class="fa-solid fa-ellipsis-vertical text-emerald-400 mx-1"></i> أعلى متصفح كروم.</li>
+                        <li>اختر <strong class="text-white">"تثبيت التطبيق" (Install App)</strong> أو "إضافة للشاشة الرئيسية".</li>
+                        <li>تأكيد التثبيت وسوف تظهر الأيقونة فوراً.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <button onclick="closeInstallInstructions()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 rounded-xl text-xs mt-4 transition-all">
+                فهمت، شكراً 👍
+            </button>
+        </div>
+    </div>
+
     <!-- Custom Delete Confirmation Modal -->
     <div id="deleteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 w-full max-w-sm text-center shadow-xl">
@@ -470,7 +573,7 @@
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 opacity-0 pointer-events-none transition-all z-50">
+    <div id="toast" class="fixed bottom-16 sm:bottom-5 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 opacity-0 pointer-events-none transition-all z-50">
         <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
         <span id="toastMsg">تم الحفظ بنجاح</span>
     </div>
@@ -489,6 +592,60 @@
 
         const PIN_KEY = 'house_expenses_pin_unlocked';
 
+        // PWA Manifest Generation
+        function registerDynamicPwa() {
+            try {
+                const iconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%230f172a'/><path d='M256 100 L380 200 L380 380 L132 380 L132 200 Z' fill='%233b82f6'/><path d='M256 100 L380 200 L256 220 L132 200 Z' fill='%2360a5fa'/><path d='M220 280 H292 V380 H220 Z' fill='%23f43f5e'/></svg>`;
+                const iconBlob = new Blob([iconSvg], { type: 'image/svg+xml' });
+                const iconUrl = URL.createObjectURL(iconBlob);
+
+                const manifest = {
+                    name: "بيت أحمد وأسماء - دفتر المصاريف",
+                    short_name: "مصاريف البيت",
+                    start_url: ".",
+                    display: "standalone",
+                    background_color: "#090d16",
+                    theme_color: "#090d16",
+                    orientation: "portrait",
+                    icons: [
+                        { src: iconUrl, sizes: "512x512", type: "image/svg+xml" }
+                    ]
+                };
+
+                const stringManifest = JSON.stringify(manifest);
+                const blob = new Blob([stringManifest], {type: 'application/json'});
+                const manifestURL = URL.createObjectURL(blob);
+                
+                const link = document.createElement('link');
+                link.rel = 'manifest';
+                link.href = manifestURL;
+                document.head.appendChild(link);
+            } catch (e) {
+                console.warn("PWA Manifest generation skipped", e);
+            }
+        }
+
+        function triggerHaptic() {
+            if ("vibrate" in navigator) {
+                try { navigator.vibrate(35); } catch (e) {}
+            }
+        }
+
+        window.openInstallInstructions = function() {
+            document.getElementById('pwaInstallModal').classList.remove('hidden');
+            document.getElementById('pwaInstallModal').classList.add('flex');
+        };
+
+        window.closeInstallInstructions = function() {
+            document.getElementById('pwaInstallModal').classList.add('hidden');
+            document.getElementById('pwaInstallModal').classList.remove('flex');
+        };
+
+        window.dismissPwaBanner = function() {
+            document.getElementById('pwaInstallBanner').classList.add('hidden');
+            localStorage.setItem('pwa_banner_dismissed', 'true');
+        };
+
         window.checkPinState = function() {
             const isUnlocked = localStorage.getItem(PIN_KEY) === 'true';
             const modal = document.getElementById('pinLockModal');
@@ -501,6 +658,7 @@
 
         window.handlePinSubmit = function(e) {
             e.preventDefault();
+            triggerHaptic();
             const pinVal = document.getElementById('pinInput').value.trim();
             const errEl = document.getElementById('pinErrorMsg');
 
@@ -509,7 +667,7 @@
                 document.getElementById('pinLockModal').classList.add('hidden');
                 document.getElementById('pinInput').value = '';
                 errEl.classList.add('hidden');
-                showToast('أهلاً بكما في دفتر المصاريف 🏠');
+                showToast('أهلاً بكما في تطبيق مصاريف البيت 🏠');
             } else {
                 errEl.classList.remove('hidden');
                 document.getElementById('pinInput').value = '';
@@ -517,6 +675,7 @@
         };
 
         window.lockApp = function() {
+            triggerHaptic();
             localStorage.removeItem(PIN_KEY);
             document.getElementById('pinLockModal').classList.remove('hidden');
         };
@@ -524,13 +683,9 @@
         let eventSource = null;
 
         async function initRealtimeSync() {
-            // Step 1: Load local stored data
             loadLocalData();
-
-            // Step 2: Fetch Cloud state FIRST before starting SSE listener
             await fetchCloudState();
 
-            // Step 3: Listen for live stream SSE messages
             const cleanRoom = encodeURIComponent(window.currentRoom.trim());
             const sseUrl = `https://ntfy.sh/${cleanRoom}/sse`;
 
@@ -557,9 +712,7 @@
                         if (data.type === 'FULL_SYNC' && Array.isArray(data.expenses) && typeof data.timestamp === 'number') {
                             applyIncomingState(data.expenses, data.timestamp);
                         }
-                    } catch (err) {
-                        // Ignore non-JSON messages
-                    }
+                    } catch (err) {}
                 };
 
                 eventSource.onerror = () => {
@@ -567,7 +720,6 @@
                 };
 
             } catch (err) {
-                console.warn('Realtime sync connection error:', err);
                 updateSyncStatus(false);
             }
         }
@@ -599,9 +751,7 @@
                                 }
                             }
                         }
-                    } catch (e) {
-                        // skip line if invalid
-                    }
+                    } catch (e) {}
                 }
 
                 if (latestCloudState && highestTimestamp > window.lastUpdated) {
@@ -611,9 +761,7 @@
                 } else if ((!window.expenses || window.expenses.length === 0) && !latestCloudState) {
                     initDefaultExpenses();
                 }
-            } catch (err) {
-                console.warn('Error polling cloud state:', err);
-            }
+            } catch (err) {}
         }
 
         function applyIncomingState(incomingExpenses, incomingTimestamp, isInitial = false) {
@@ -629,6 +777,7 @@
         }
 
         async function manualSyncFromCloud() {
+            triggerHaptic();
             showToast('جاري تحديث البيانات من السحابة... 🔄');
             await fetchCloudState();
             showToast('تم التحديث بنجاح ✨');
@@ -651,9 +800,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-            } catch (err) {
-                console.warn('Failed to broadcast state:', err);
-            }
+            } catch (err) {}
         }
 
         function loadLocalData() {
@@ -679,9 +826,11 @@
             const today = new Date().toISOString().split('T')[0];
             window.expenses = [
                 { id: '1', date: today, month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم كاندوز', buyer: 'أحمد', amount: 750, createdAt: 1000 },
-                { id: '2', date: today, month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك', buyer: 'أسماء', amount: 380, createdAt: 2000 },
-                { id: '3', date: today, month: 'سبتمبر', category: 'خضروات', name: 'خضار وفاكهة للأسبوع', buyer: 'أسماء', amount: 250, createdAt: 3000 },
-                { id: '4', date: today, month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ولبتون', buyer: 'أحمد', amount: 310, createdAt: 4000 }
+                { id: '2', date: today, month: 'سبتمبر', category: 'مستلزمات عمر', name: 'حفاضات + لبن عمر', buyer: 'أسماء', amount: 480, createdAt: 2000 },
+                { id: '3', date: today, month: 'سبتمبر', category: 'مشروبات وبن', name: 'ربع بن عبد المعبود + نسكافيه', buyer: 'أحمد', amount: 180, createdAt: 3000 },
+                { id: '4', date: today, month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك', buyer: 'أسماء', amount: 380, createdAt: 4000 },
+                { id: '5', date: today, month: 'سبتمبر', category: 'خضروات', name: 'خضار وفاكهة للأسبوع', buyer: 'أسماء', amount: 250, createdAt: 5000 },
+                { id: '6', date: today, month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ولبتون', buyer: 'أحمد', amount: 310, createdAt: 6000 }
             ];
             window.lastUpdated = Date.now();
             saveLocalFallback();
@@ -704,12 +853,13 @@
             } else {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-500";
                 text.className = "text-amber-400 font-bold";
-                text.textContent = "🟡 وضع التخزين المحلي (جاري إعادة الاتصال)";
+                text.textContent = "🟡 وضع التخزين المحلي (جاري الاتصال)";
             }
         }
 
         window.handleFormSubmit = async function(e) {
             e.preventDefault();
+            triggerHaptic();
 
             const docId = document.getElementById('editingDocId').value;
             const name = document.getElementById('itemName').value.trim();
@@ -753,6 +903,7 @@
         };
 
         window.editExpense = function(id) {
+            triggerHaptic();
             const item = window.expenses.find(x => x.id === id);
             if (!item) return;
 
@@ -774,6 +925,7 @@
         };
 
         window.cancelEditMode = function() {
+            triggerHaptic();
             document.getElementById('editingDocId').value = '';
             document.getElementById('itemName').value = '';
             document.getElementById('itemAmount').value = '';
@@ -785,6 +937,7 @@
         };
 
         window.openDeleteModal = function(id) {
+            triggerHaptic();
             window.pendingDeleteId = id;
             document.getElementById('deleteModal').classList.remove('hidden');
             document.getElementById('deleteModal').classList.add('flex');
@@ -797,6 +950,7 @@
         };
 
         window.confirmDeleteExpense = async function() {
+            triggerHaptic();
             if (!window.pendingDeleteId) return;
 
             const id = window.pendingDeleteId;
@@ -812,6 +966,7 @@
         };
 
         window.openSyncModal = function() {
+            triggerHaptic();
             document.getElementById('roomCodeInput').value = window.currentRoom;
             document.getElementById('syncModal').classList.remove('hidden');
             document.getElementById('syncModal').classList.add('flex');
@@ -823,6 +978,7 @@
         };
 
         window.saveRoomCode = function() {
+            triggerHaptic();
             const val = document.getElementById('roomCodeInput').value.trim();
             if (val) {
                 window.currentRoom = val;
@@ -834,6 +990,7 @@
         };
 
         window.resetRoomCode = function() {
+            triggerHaptic();
             window.currentRoom = DEFAULT_ROOM;
             localStorage.removeItem('house_sync_room_code');
             closeSyncModal();
@@ -843,6 +1000,11 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             window.checkPinState();
+            registerDynamicPwa();
+
+            if (localStorage.getItem('pwa_banner_dismissed') === 'true' || window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('pwaInstallBanner').classList.add('hidden');
+            }
 
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('itemDate').value = today;
@@ -862,32 +1024,40 @@
         let pieChart = null;
 
         const categoriesMap = {
-            'منظفات': { icon: 'fa-soap', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
-            'لحوم': { icon: 'fa-drumstick-bite', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' },
-            'خضروات': { icon: 'fa-carrot', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30' },
-            'فواكه': { icon: 'fa-apple-whole', color: 'bg-pink-500/20 text-pink-300 border-pink-500/30' },
-            'ورقيات': { icon: 'fa-leaf', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-            'بهارات': { icon: 'fa-pepper-hot', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
-            'خزين مطبخ': { icon: 'fa-boxes-stacked', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
-            'مستلزمات للفطار': { icon: 'fa-egg', color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' },
-            'أخرى': { icon: 'fa-basket-shopping', color: 'bg-slate-700/50 text-slate-300 border-slate-600' }
+            'مستلزمات عمر': { icon: 'fa-baby', color: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30', chartColor: '#06b6d4' },
+            'مشروبات وبن': { icon: 'fa-mug-hot', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30', chartColor: '#d97706' },
+            'منظفات': { icon: 'fa-soap', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30', chartColor: '#a855f7' },
+            'لحوم': { icon: 'fa-drumstick-bite', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30', chartColor: '#f43f5e' },
+            'خضروات': { icon: 'fa-carrot', color: 'bg-orange-500/20 text-orange-300 border-orange-500/30', chartColor: '#f97316' },
+            'فواكه': { icon: 'fa-apple-whole', color: 'bg-pink-500/20 text-pink-300 border-pink-500/30', chartColor: '#ec4899' },
+            'ورقيات': { icon: 'fa-leaf', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', chartColor: '#10b981' },
+            'بهارات': { icon: 'fa-pepper-hot', color: 'bg-red-500/20 text-red-300 border-red-500/30', chartColor: '#ef4444' },
+            'خزين مطبخ': { icon: 'fa-boxes-stacked', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30', chartColor: '#3b82f6' },
+            'مستلزمات للفطار': { icon: 'fa-egg', color: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30', chartColor: '#eab308' },
+            'صيدلية وأدوية': { icon: 'fa-pills', color: 'bg-teal-500/20 text-teal-300 border-teal-500/30', chartColor: '#14b8a6' },
+            'فواتير ومرافق': { icon: 'fa-lightbulb', color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', chartColor: '#6366f1' },
+            'حلويات وسناكس': { icon: 'fa-cookie-bite', color: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30', chartColor: '#d946ef' },
+            'صيانة وتجهيزات': { icon: 'fa-wrench', color: 'bg-stone-500/20 text-stone-300 border-stone-500/30', chartColor: '#78716c' },
+            'أخرى': { icon: 'fa-basket-shopping', color: 'bg-slate-700/50 text-slate-300 border-slate-600', chartColor: '#64748b' }
         };
 
         function setBuyer(buyer) {
+            triggerHaptic();
             window.currentBuyer = buyer;
             const btnAhmed = document.getElementById('btnBuyerAhmed');
             const btnAsmaa = document.getElementById('btnBuyerAsmaa');
 
             if (buyer === 'أحمد') {
-                btnAhmed.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-ahmed-500 bg-ahmed-600 text-white shadow-sm transition-all";
-                btnAsmaa.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all";
+                btnAhmed.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-ahmed-500 bg-ahmed-600 text-white shadow-sm transition-all active:scale-95";
+                btnAsmaa.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all active:scale-95";
             } else {
-                btnAhmed.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all";
-                btnAsmaa.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-asmaa-500 bg-asmaa-600 text-white shadow-sm transition-all";
+                btnAhmed.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-slate-700 text-slate-400 bg-slate-800 transition-all active:scale-95";
+                btnAsmaa.className = "buyer-btn py-2 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border border-asmaa-500 bg-asmaa-600 text-white shadow-sm transition-all active:scale-95";
             }
         }
 
         function handleMonthChange() {
+            triggerHaptic();
             updateDashboard();
         }
 
@@ -909,10 +1079,10 @@
             let asmaaTotal = 0;
             let asmaaCount = 0;
 
-            const catTotals = {
-                'منظفات': 0, 'لحوم': 0, 'خضروات': 0, 'فواكه': 0,
-                'ورقيات': 0, 'بهارات': 0, 'خزين مطبخ': 0, 'مستلزمات للفطار': 0, 'أخرى': 0
-            };
+            const catTotals = {};
+            Object.keys(categoriesMap).forEach(cat => {
+                catTotals[cat] = 0;
+            });
 
             filtered.forEach(item => {
                 const amt = parseFloat(item.amount) || 0;
@@ -933,7 +1103,6 @@
                 }
             });
 
-            // Update KPI Displays
             document.getElementById('kpiTotalAmount').textContent = total.toLocaleString('ar-EG');
             document.getElementById('kpiAhmedAmount').textContent = ahmedTotal.toLocaleString('ar-EG');
             document.getElementById('kpiAhmedCount').textContent = `${ahmedCount} مشتريات`;
@@ -950,7 +1119,6 @@
             document.getElementById('kpiAhmedBadge').textContent = `${ahmedPct}%`;
             document.getElementById('kpiAsmaaBadge').textContent = `${asmaaPct}%`;
 
-            // Top Category calculation
             let topCat = 'لا يوجد';
             let maxAmt = 0;
             Object.keys(catTotals).forEach(cat => {
@@ -969,8 +1137,11 @@
 
         function renderHistogram(catTotals) {
             const ctx = document.getElementById('categoryHistogramChart').getContext('2d');
-            const labels = Object.keys(catTotals);
-            const dataValues = Object.values(catTotals);
+            
+            const activeCats = Object.keys(catTotals).filter(c => catTotals[c] > 0);
+            const labels = activeCats.length > 0 ? activeCats : Object.keys(catTotals);
+            const dataValues = labels.map(c => catTotals[c]);
+            const bgColors = labels.map(c => (categoriesMap[c] && categoriesMap[c].chartColor) || '#64748b');
 
             if (histogramChart) histogramChart.destroy();
 
@@ -981,10 +1152,7 @@
                     datasets: [{
                         label: 'المبلغ (ج.م)',
                         data: dataValues,
-                        backgroundColor: [
-                            '#a855f7', '#f43f5e', '#f97316', '#ec4899',
-                            '#10b981', '#f59e0b', '#3b82f6', '#eab308', '#64748b'
-                        ],
+                        backgroundColor: bgColors,
                         borderRadius: 8,
                         borderSkipped: false,
                     }]
@@ -1016,23 +1184,12 @@
             const labels = [];
             const dataValues = [];
             const colors = [];
-            const colorPalette = {
-                'منظفات': '#a855f7',
-                'لحوم': '#f43f5e',
-                'خضروات': '#f97316',
-                'فواكه': '#ec4899',
-                'ورقيات': '#10b981',
-                'بهارات': '#f59e0b',
-                'خزين مطبخ': '#3b82f6',
-                'مستلزمات للفطار': '#eab308',
-                'أخرى': '#64748b'
-            };
 
             Object.keys(catTotals).forEach(cat => {
                 if (catTotals[cat] > 0) {
                     labels.push(cat);
                     dataValues.push(catTotals[cat]);
-                    colors.push(colorPalette[cat] || '#64748b');
+                    colors.push((categoriesMap[cat] && categoriesMap[cat].chartColor) || '#64748b');
                 }
             });
 
@@ -1060,11 +1217,12 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'left',
+                            position: 'bottom',
                             labels: {
                                 color: '#cbd5e1',
                                 font: { family: 'Cairo', size: 10, weight: 'bold' },
-                                boxWidth: 12
+                                boxWidth: 10,
+                                padding: 8
                             }
                         }
                     }
@@ -1120,6 +1278,7 @@
         }
 
         function exportToExcel() {
+            triggerHaptic();
             const dataToExport = (window.expenses || []).map((x, idx) => ({
                 "م": idx + 1,
                 "التاريخ": x.date,
