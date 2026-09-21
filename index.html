@@ -34,6 +34,10 @@
     <!-- SheetJS (xlsx) for Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+    <!-- Firebase JS SDK (v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -155,18 +159,15 @@
                 <div>
                     <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight">بيت أحمد وأسماء - دفتر المصاريف</h1>
                     <p class="text-[11px] font-semibold flex items-center gap-1.5 mt-0.5">
-                        <span id="syncStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة (تزامن لحظي محفوظ)</span>
+                        <span id="syncStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                        <span id="syncStatusText" class="text-amber-400 font-bold">🟡 جاري فحص الاتصال بـ Firebase...</span>
                     </p>
                 </div>
             </div>
 
             <div class="flex items-center gap-1.5 md:hidden">
-                <button onclick="manualSyncFromCloud()" class="bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/40 text-xs font-bold active:scale-95 transition-all" title="إعادة جلب البيانات">
-                    <i class="fa-solid fa-rotate"></i>
-                </button>
-                <button onclick="openSyncModal()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold active:scale-95 transition-all" title="إعدادات الغرفة">
-                    <i class="fa-solid fa-wifi"></i>
+                <button onclick="openFirebaseConfigModal()" class="bg-amber-600/30 text-amber-300 p-2.5 rounded-xl border border-amber-500/40 text-xs font-bold active:scale-95 transition-all" title="إعدادات Firebase">
+                    <i class="fa-solid fa-fire"></i>
                 </button>
                 <button onclick="lockApp()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold active:scale-95 transition-all" title="قفل">
                     <i class="fa-solid fa-lock"></i>
@@ -196,19 +197,14 @@
                 </select>
             </div>
 
-            <button onclick="manualSyncFromCloud()" class="hidden md:flex bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/30 text-xs font-bold items-center gap-1.5 transition-all active:scale-95" title="تحديث وتنشيط البيانات من السحابة">
-                <i class="fa-solid fa-rotate text-indigo-400"></i>
-                <span>تحديث</span>
-            </button>
-
             <button onclick="exportToExcel()" class="bg-emerald-600/90 hover:bg-emerald-600 active:scale-95 text-white text-xs font-extrabold py-2 px-3 rounded-xl border border-emerald-500/30 transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto">
                 <i class="fa-solid fa-file-excel text-sm"></i>
                 <span>تصدير (XLSX)</span>
             </button>
 
-            <button onclick="openSyncModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all active:scale-95" title="إعدادات الغرفة السحابية">
-                <i class="fa-solid fa-wifi text-indigo-400"></i>
-                <span>كود الغرفة</span>
+            <button onclick="openFirebaseConfigModal()" class="hidden md:flex bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 p-2.5 rounded-xl text-xs font-bold items-center gap-1.5 transition-all active:scale-95" title="ربط السحابة بـ Firebase">
+                <i class="fa-solid fa-fire text-amber-400"></i>
+                <span>إعدادات Firebase</span>
             </button>
 
             <button onclick="lockApp()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all active:scale-95" title="قفل التطبيق">
@@ -219,7 +215,6 @@
     </header>
 
     <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shrink-0">
-        
         <!-- Total Expense Card -->
         <div class="bg-slate-900 border border-slate-800 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-between">
             <div class="flex justify-between items-center text-slate-400 mb-1.5">
@@ -289,7 +284,6 @@
                 <div class="text-[10px] text-slate-400 mt-0.5" id="kpiTopCategoryAmount">0 ج.م</div>
             </div>
         </div>
-
     </section>
 
     <!-- MAIN DASHBOARD GRID -->
@@ -471,18 +465,19 @@
 
     </main>
 
+    <!-- Mobile Navigation Bar -->
     <div class="md:hidden fixed bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur-lg border border-slate-700/80 rounded-2xl p-2.5 flex items-center justify-around z-40 shadow-2xl">
         <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
             <i class="fa-solid fa-plus-circle text-indigo-400 text-base"></i>
             <span>إضافة</span>
         </button>
-        <button onclick="manualSyncFromCloud()" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
-            <i class="fa-solid fa-rotate text-emerald-400 text-base"></i>
-            <span>تحديث</span>
-        </button>
         <button onclick="exportToExcel()" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
             <i class="fa-solid fa-file-excel text-amber-400 text-base"></i>
             <span>إكسيل</span>
+        </button>
+        <button onclick="openFirebaseConfigModal()" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
+            <i class="fa-solid fa-fire text-amber-400 text-base"></i>
+            <span>Firebase</span>
         </button>
         <button onclick="lockApp()" class="flex flex-col items-center text-slate-300 hover:text-white text-[10px] font-bold gap-0.5">
             <i class="fa-solid fa-lock text-rose-400 text-base"></i>
@@ -548,27 +543,46 @@
         </div>
     </div>
 
-    <!-- Sync Room Setup Modal -->
-    <div id="syncModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl relative">
+    <!-- Firebase Config Setup Modal -->
+    <div id="firebaseConfigModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
                 <h3 class="font-black text-white text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-wifi text-indigo-400"></i>
-                    كود الغرفة للتزامن بين الموبايلين
+                    <i class="fa-solid fa-fire text-amber-500"></i>
+                    ربط قاعدة بيانات Firebase (التزامن اللحظي)
                 </h3>
-                <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white p-1">
+                <button onclick="closeFirebaseConfigModal()" class="text-slate-400 hover:text-white p-1">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <p class="text-xs text-slate-300 mb-3 leading-relaxed">
-                تأكد أن هذا الكود مكتوب <strong class="text-amber-400">بنفس الشفرة بالضبط</strong> على الموبايل الآخر (موبايل أحمد وموبايل أسماء) لربطهما معاً مباشرةً:
+
+            <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                ضع إعدادات مشروع <strong class="text-amber-400">Firebase</strong> الخاصة بك هنا مرة واحدة فقط، وسيعمل التزامن فوراً وبشكل دائم بين جميع أجهزتك:
             </p>
-            <input type="text" id="roomCodeInput" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-center text-sm font-bold font-mono text-indigo-300 focus:outline-none focus:border-indigo-500 mb-4" placeholder="اكتب كود مخصص هنا">
-            
-            <div class="flex gap-2">
-                <button onclick="saveRoomCode()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs">تطبيق وإعادة الاتصال 🔄</button>
-                <button onclick="resetRoomCode()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs">افتراضي</button>
-            </div>
+
+            <form onsubmit="saveFirebaseConfig(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">API Key</label>
+                    <input type="text" id="fbApiKey" required placeholder="AIzaSy..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Database URL (رابط قاعدة البيانات)</label>
+                    <input type="text" id="fbDatabaseURL" required placeholder="https://your-project-default-rtdb.firebaseio.com" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Project ID</label>
+                    <input type="text" id="fbProjectId" required placeholder="my-house-expenses" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="pt-2 flex gap-2">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-amber-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl transition-all shadow-md">
+                        حفظ وتشغيل التزامن 🚀
+                    </button>
+                    <button type="button" onclick="closeFirebaseConfigModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2.5 rounded-xl">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -579,26 +593,13 @@
     </div>
 
     <script>
-        // Global State Variables
+        // Global Application State
         window.expenses = [];
-        window.lastUpdated = 0;
         window.currentBuyer = 'أحمد';
         window.pendingDeleteId = null;
-        window.myDeviceId = 'dev_' + Math.random().toString(36).substring(2, 9);
-        
-        // Sync Room Configuration (used only as a lightweight "ping" channel now)
-        const DEFAULT_ROOM = 'ahmed_asmaa_house_ledger_qz84m_sync';
-        window.currentRoom = localStorage.getItem('house_sync_room_code') || DEFAULT_ROOM;
-
-        // Persistent Cloud Storage Configuration (jsonblob.com holds the real data permanently)
-        const BLOB_ID_KEY = 'house_expenses_blob_id';
-        window.dataBlobId = localStorage.getItem(BLOB_ID_KEY) || null;
+        window.dbRef = null;
 
         const PIN_KEY = 'house_expenses_pin_unlocked';
-
-        // The PIN is never stored as plain text in the code — only its SHA-256 hash below.
-        // To change it: pick a new code and ask Claude (or any SHA-256 tool) to hash it,
-        // then replace PIN_HASH with the new hash. Never put the real PIN here as text.
         const PIN_HASH = '31d8edb99534fd4800651db4d241d86e0380fa7376718b88590c2d772b41d5f4';
         const PIN_ATTEMPTS_KEY = 'house_expenses_pin_attempts';
         const PIN_LOCKOUT_UNTIL_KEY = 'house_expenses_pin_lockout_until';
@@ -609,39 +610,6 @@
             const enc = new TextEncoder().encode(text);
             const digest = await crypto.subtle.digest('SHA-256', enc);
             return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // PWA Manifest Generation
-        function registerDynamicPwa() {
-            try {
-                const iconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='120' fill='%230f172a'/><path d='M256 100 L380 200 L380 380 L132 380 L132 200 Z' fill='%233b82f6'/><path d='M256 100 L380 200 L256 220 L132 200 Z' fill='%2360a5fa'/><path d='M220 280 H292 V380 H220 Z' fill='%23f43f5e'/></svg>`;
-                const iconBlob = new Blob([iconSvg], { type: 'image/svg+xml' });
-                const iconUrl = URL.createObjectURL(iconBlob);
-
-                const manifest = {
-                    name: "بيت أحمد وأسماء - دفتر المصاريف",
-                    short_name: "مصاريف البيت",
-                    start_url: ".",
-                    display: "standalone",
-                    background_color: "#090d16",
-                    theme_color: "#090d16",
-                    orientation: "portrait",
-                    icons: [
-                        { src: iconUrl, sizes: "512x512", type: "image/svg+xml" }
-                    ]
-                };
-
-                const stringManifest = JSON.stringify(manifest);
-                const blob = new Blob([stringManifest], {type: 'application/json'});
-                const manifestURL = URL.createObjectURL(blob);
-                
-                const link = document.createElement('link');
-                link.rel = 'manifest';
-                link.href = manifestURL;
-                document.head.appendChild(link);
-            } catch (e) {
-                console.warn("PWA Manifest generation skipped", e);
-            }
         }
 
         function triggerHaptic() {
@@ -724,258 +692,133 @@
             document.getElementById('pinLockModal').classList.remove('hidden');
         };
 
-        let eventSource = null;
+        // --- FIREBASE INTEGRATION LOGIC ---
+        const DEFAULT_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDT1hjCn-x2qsEKUMGSKJtiA3aG5QVC1Oo",
+            authDomain: "ahmaedasmaaexpenses.firebaseapp.com",
+            databaseURL: "https://ahmaedasmaaexpenses-default-rtdb.firebaseio.com",
+            projectId: "ahmaedasmaaexpenses",
+            storageBucket: "ahmaedasmaaexpenses.firebasestorage.app",
+            messagingSenderId: "950442270255",
+            appId: "1:950442270255:web:2ec41edf366201349d30da"
+        };
 
-        async function initRealtimeSync() {
-            loadLocalData();
-            await fetchCloudState();
-
-            const cleanRoom = encodeURIComponent(window.currentRoom.trim());
-            const sseUrl = `https://ntfy.sh/${cleanRoom}/sse`;
-
-            if (eventSource) {
-                eventSource.close();
+        function getSavedFirebaseConfig() {
+            const cfg = localStorage.getItem('house_expenses_fb_config');
+            if (cfg) {
+                try { return JSON.parse(cfg); } catch (e) { return DEFAULT_FIREBASE_CONFIG; }
             }
-
-            try {
-                eventSource = new EventSource(sseUrl);
-
-                eventSource.onopen = () => {
-                    updateSyncStatus(true);
-                };
-
-                // ntfy is now only used as an instant "ping" so the other phone knows
-                // to go fetch the real data from the permanent cloud store (jsonblob).
-                // The actual expenses are NEVER trusted from this message alone.
-                eventSource.onmessage = (e) => {
-                    try {
-                        const payload = JSON.parse(e.data);
-                        if (!payload.message) return;
-
-                        const data = JSON.parse(payload.message);
-
-                        if (data.sender === window.myDeviceId) return;
-
-                        if (data.type === 'PING') {
-                            if (data.blobId && !window.dataBlobId) {
-                                window.dataBlobId = data.blobId;
-                                localStorage.setItem(BLOB_ID_KEY, window.dataBlobId);
-                            }
-                            fetchCloudState();
-                        }
-                    } catch (err) {}
-                };
-
-                eventSource.onerror = () => {
-                    updateSyncStatus(false);
-                };
-
-            } catch (err) {
-                updateSyncStatus(false);
-            }
+            return DEFAULT_FIREBASE_CONFIG;
         }
 
-        // Looks for a recent PING on the ntfy channel that carries the shared blobId,
-        // so a second phone can auto-discover the SAME permanent storage the first
-        // phone created, without anyone typing anything by hand.
-        async function discoverBlobIdFromPings() {
-            const cleanRoom = encodeURIComponent(window.currentRoom.trim());
-            const jsonUrl = `https://ntfy.sh/${cleanRoom}/json?poll=1`;
+        function initFirebase() {
+            const config = getSavedFirebaseConfig();
+            if (!config || !config.apiKey || !config.databaseURL) {
+                updateSyncStatus(false, '⚠️ اضغط هنا لضبط إعدادات Firebase لمرة واحدة');
+                loadLocalData();
+                return;
+            }
+
             try {
-                const response = await fetch(jsonUrl);
-                if (!response.ok) return null;
-                const text = await response.text();
-                const lines = text.trim().split('\n');
-                let foundId = null;
-                let highestTimestamp = -1;
-                for (const line of lines) {
-                    if (!line) continue;
-                    try {
-                        const item = JSON.parse(line);
-                        if (item.message) {
-                            const data = JSON.parse(item.message);
-                            if (data.type === 'PING' && data.blobId && typeof data.timestamp === 'number' && data.timestamp > highestTimestamp) {
-                                highestTimestamp = data.timestamp;
-                                foundId = data.blobId;
-                            }
-                        }
-                    } catch (e) {}
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(config);
                 }
-                return foundId;
-            } catch (err) {
-                return null;
-            }
-        }
+                window.dbRef = firebase.database().ref('house_ledger');
 
-        // Makes sure we have a jsonblob.com storage id: reuse the saved one, otherwise
-        // try to discover it from a partner phone's ping, otherwise create a brand new
-        // permanent store (seeded with whatever is on this device already — never fake data).
-        async function ensureBlobId() {
-            if (window.dataBlobId) return window.dataBlobId;
-
-            const discovered = await discoverBlobIdFromPings();
-            if (discovered) {
-                window.dataBlobId = discovered;
-                localStorage.setItem(BLOB_ID_KEY, window.dataBlobId);
-                return window.dataBlobId;
-            }
-
-            try {
-                const response = await fetch('https://jsonblob.com/api/jsonBlob', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({
-                        expenses: window.expenses || [],
-                        timestamp: window.lastUpdated || Date.now(),
-                        selectedMonth: window.selectedMonth || document.getElementById('filterMonthSelect').value
-                    })
-                });
-                const location = response.headers.get('Location') || response.headers.get('location');
-                if (location) {
-                    window.dataBlobId = location.split('/').pop();
-                    localStorage.setItem(BLOB_ID_KEY, window.dataBlobId);
-                    await sendPing();
-                    return window.dataBlobId;
-                }
-            } catch (err) {}
-
-            return null;
-        }
-
-        async function sendPing() {
-            if (!window.dataBlobId) return;
-            const cleanRoom = encodeURIComponent(window.currentRoom.trim());
-            try {
-                await fetch(`https://ntfy.sh/${cleanRoom}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sender: window.myDeviceId,
-                        type: 'PING',
-                        blobId: window.dataBlobId,
-                        timestamp: window.lastUpdated || Date.now()
-                    })
-                });
-            } catch (err) {}
-        }
-
-        async function fetchCloudState() {
-            const blobId = await ensureBlobId();
-            if (!blobId) return;
-
-            try {
-                const response = await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}`, {
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (response.status === 404) {
-                    // The permanent store vanished (rare) — never invent data, just
-                    // re-publish whatever this device still has locally as the new source of truth.
-                    window.dataBlobId = null;
-                    localStorage.removeItem(BLOB_ID_KEY);
-                    if (window.expenses && window.expenses.length > 0) {
-                        showToast('تعذر الوصول لنسخة السحابة، جاري استخدام آخر نسخة محفوظة على الجهاز ⚠️');
-                        await broadcastFullState();
+                // Realtime sync listener!
+                window.dbRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data && Array.isArray(data.expenses)) {
+                        window.expenses = data.expenses;
+                    } else if (data && typeof data === 'object') {
+                        // In case saved as object map
+                        window.expenses = Object.values(data.expenses || {});
+                    } else {
+                        window.expenses = [];
                     }
-                    return;
-                }
+                    saveLocalFallback();
+                    updateDashboard();
+                    updateSyncStatus(true, '🟢 متصل لحظياً بـ Firebase (تزامن فوري)');
+                }, (error) => {
+                    console.error("Firebase Error:", error);
+                    updateSyncStatus(false, '🔴 خطأ في الاتصال بقاعدة البيانات');
+                });
 
-                if (!response.ok) return;
-
-                const cloudData = await response.json();
-                if (!cloudData || !Array.isArray(cloudData.expenses) || typeof cloudData.timestamp !== 'number') return;
-
-                if (cloudData.timestamp > window.lastUpdated) {
-                    applyIncomingState(cloudData.expenses, cloudData.timestamp, true, cloudData.selectedMonth || null);
-                } else if (window.lastUpdated > cloudData.timestamp) {
-                    await broadcastFullState();
-                }
-            } catch (err) {}
-        }
-
-        function applyIncomingState(incomingExpenses, incomingTimestamp, isInitial = false, incomingSelectedMonth = null) {
-            if (incomingTimestamp > window.lastUpdated) {
-                window.expenses = incomingExpenses;
-                window.lastUpdated = incomingTimestamp;
-
-                if (incomingSelectedMonth) {
-                    window.selectedMonth = incomingSelectedMonth;
-                    localStorage.setItem('house_expenses_selected_month', incomingSelectedMonth);
-                    const monthSelectEl = document.getElementById('filterMonthSelect');
-                    if (monthSelectEl) monthSelectEl.value = incomingSelectedMonth;
-                }
-
-                saveLocalFallback();
-                updateDashboard();
-                if (!isInitial) {
-                    showToast('تم استقبال تحديث جديد أونلاين 📲');
-                }
+            } catch (err) {
+                console.error("Initialization error:", err);
+                updateSyncStatus(false, '❌ خطأ في تكوين Firebase');
             }
         }
 
-        async function manualSyncFromCloud() {
+        window.openFirebaseConfigModal = function() {
             triggerHaptic();
-            showToast('جاري تحديث البيانات من السحابة... 🔄');
-            await fetchCloudState();
-            showToast('تم التحديث بنجاح ✨');
-        }
+            const cfg = getSavedFirebaseConfig() || {};
+            document.getElementById('fbApiKey').value = cfg.apiKey || '';
+            document.getElementById('fbDatabaseURL').value = cfg.databaseURL || '';
+            document.getElementById('fbProjectId').value = cfg.projectId || '';
+            document.getElementById('firebaseConfigModal').classList.remove('hidden');
+            document.getElementById('firebaseConfigModal').classList.add('flex');
+        };
 
-        async function broadcastFullState() {
-            const blobId = await ensureBlobId();
-            if (!blobId) return;
+        window.closeFirebaseConfigModal = function() {
+            document.getElementById('firebaseConfigModal').classList.add('hidden');
+            document.getElementById('firebaseConfigModal').classList.remove('flex');
+        };
 
-            const payload = {
-                expenses: window.expenses,
-                timestamp: window.lastUpdated || Date.now(),
-                selectedMonth: window.selectedMonth || document.getElementById('filterMonthSelect').value
-            };
+        window.saveFirebaseConfig = function(e) {
+            e.preventDefault();
+            triggerHaptic();
+            const apiKey = document.getElementById('fbApiKey').value.trim();
+            const databaseURL = document.getElementById('fbDatabaseURL').value.trim();
+            const projectId = document.getElementById('fbProjectId').value.trim();
 
-            try {
-                await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                await sendPing();
-            } catch (err) {}
+            const config = { apiKey, databaseURL, projectId };
+            localStorage.setItem('house_expenses_fb_config', JSON.stringify(config));
+            closeFirebaseConfigModal();
+            showToast('تم حفظ الإعدادات، جاري الاتصال... 🔄');
+            initFirebase();
+        };
+
+        async function syncToFirebase() {
+            if (window.dbRef) {
+                try {
+                    await window.dbRef.set({
+                        expenses: window.expenses,
+                        updatedAt: Date.now()
+                    });
+                } catch (err) {
+                    console.error("Failed to sync:", err);
+                    showToast('تعذر التزامن، جاري الحفظ محلياً ⚠️');
+                }
+            }
         }
 
         function loadLocalData() {
             const savedData = localStorage.getItem('house_expenses_local_data');
-            const savedTime = localStorage.getItem('house_expenses_last_updated');
-
             if (savedData) {
-                try {
-                    window.expenses = JSON.parse(savedData);
-                    window.lastUpdated = parseInt(savedTime, 10) || 0;
-                } catch (e) {
-                    window.expenses = [];
-                    window.lastUpdated = 0;
-                }
+                try { window.expenses = JSON.parse(savedData); } catch (e) { window.expenses = []; }
             } else {
                 window.expenses = [];
-                window.lastUpdated = 0;
             }
             updateDashboard();
         }
 
         function saveLocalFallback() {
             localStorage.setItem('house_expenses_local_data', JSON.stringify(window.expenses));
-            localStorage.setItem('house_expenses_last_updated', window.lastUpdated.toString());
         }
 
-        function updateSyncStatus(isOnline) {
+        function updateSyncStatus(isOnline, textMsg) {
             const dot = document.getElementById('syncStatusDot');
             const text = document.getElementById('syncStatusText');
             if (isOnline) {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 text.className = "text-emerald-400 font-bold";
-                text.textContent = "🟢 متصل بالسحابة (تزامن لحظي محفوظ)";
             } else {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-500";
-                text.className = "text-amber-400 font-bold";
-                text.textContent = "🟡 وضع التخزين المحلي (جاري الاتصال)";
+                text.className = "text-amber-400 font-bold cursor-pointer";
+                text.onclick = openFirebaseConfigModal;
             }
+            text.textContent = textMsg;
         }
 
         window.handleFormSubmit = async function(e) {
@@ -1008,19 +851,18 @@
                     window.expenses[idx] = { ...window.expenses[idx], ...itemPayload };
                 }
                 cancelEditMode();
-                showToast('تم تحديث البيانات أونلاين 🔄');
+                showToast('تم تحديث البيانات 🔄');
             } else {
                 itemPayload.createdAt = Date.now();
                 window.expenses.unshift(itemPayload);
                 document.getElementById('itemName').value = '';
                 document.getElementById('itemAmount').value = '';
-                showToast('تمت الإضافة وتحديث الموبايل الآخر فوراً 📲');
+                showToast('تمت الإضافة والتزامن فوراً 📲');
             }
 
-            window.lastUpdated = Date.now();
             saveLocalFallback();
             updateDashboard();
-            await broadcastFullState();
+            await syncToFirebase();
         };
 
         window.editExpense = function(id) {
@@ -1078,50 +920,15 @@
             closeDeleteModal();
 
             window.expenses = window.expenses.filter(x => x.id !== id);
-            window.lastUpdated = Date.now();
             saveLocalFallback();
             updateDashboard();
             
-            showToast('تم حذف المصروف والتزامن 🗑️');
-            await broadcastFullState();
-        };
-
-        window.openSyncModal = function() {
-            triggerHaptic();
-            document.getElementById('roomCodeInput').value = window.currentRoom;
-            document.getElementById('syncModal').classList.remove('hidden');
-            document.getElementById('syncModal').classList.add('flex');
-        };
-
-        window.closeSyncModal = function() {
-            document.getElementById('syncModal').classList.add('hidden');
-            document.getElementById('syncModal').classList.remove('flex');
-        };
-
-        window.saveRoomCode = function() {
-            triggerHaptic();
-            const val = document.getElementById('roomCodeInput').value.trim();
-            if (val) {
-                window.currentRoom = val;
-                localStorage.setItem('house_sync_room_code', val);
-                closeSyncModal();
-                showToast('تم تغيير كود الغرفة! جاري الاتصال...');
-                initRealtimeSync();
-            }
-        };
-
-        window.resetRoomCode = function() {
-            triggerHaptic();
-            window.currentRoom = DEFAULT_ROOM;
-            localStorage.removeItem('house_sync_room_code');
-            closeSyncModal();
-            showToast('تمت العودة لكود الغرفة الافتراضي');
-            initRealtimeSync();
+            showToast('تم حذف المصروف 🗑️');
+            await syncToFirebase();
         };
 
         window.addEventListener('DOMContentLoaded', () => {
             window.checkPinState();
-            registerDynamicPwa();
 
             if (localStorage.getItem('pwa_banner_dismissed') === 'true' || window.matchMedia('(display-mode: standalone)').matches) {
                 document.getElementById('pwaInstallBanner').classList.add('hidden');
@@ -1133,16 +940,13 @@
             const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             const currentMonthName = monthNames[new Date().getMonth()];
 
-            // The "add new expense" form always defaults to the real current month.
             document.getElementById('itemMonth').value = currentMonthName;
 
-            // The dashboard FILTER remembers whatever month you last picked (on this device),
-            // so it never jumps back on its own after a refresh — only changes it by hand.
             const savedFilterMonth = localStorage.getItem('house_expenses_selected_month');
             window.selectedMonth = savedFilterMonth || currentMonthName;
             document.getElementById('filterMonthSelect').value = window.selectedMonth;
 
-            initRealtimeSync();
+            initFirebase();
         });
     </script>
 
@@ -1189,10 +993,6 @@
             window.selectedMonth = selected;
             localStorage.setItem('house_expenses_selected_month', selected);
             updateDashboard();
-            // Push the new month choice to the shared cloud store too, so the other
-            // phone switches to the same month automatically (until changed by hand again).
-            window.lastUpdated = Date.now();
-            broadcastFullState();
         }
 
         function getFilteredData() {
