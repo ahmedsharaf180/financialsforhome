@@ -118,23 +118,26 @@
                     <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight">بيت أحمد وأسماء - دفتر المصاريف</h1>
                     <p class="text-[11px] font-semibold flex items-center gap-1.5 mt-0.5">
                         <span id="syncStatusDot" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة المباشرة (تزامن لحظي بدون Firebase)</span>
+                        <span id="syncStatusText" class="text-emerald-400 font-bold">🟢 متصل بالسحابة (تزامن لحظي محفوظ)</span>
                     </p>
                 </div>
             </div>
 
             <div class="flex items-center gap-1.5 md:hidden">
-                <button onclick="openSyncModal()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="إعدادات القناة">
+                <button onclick="manualSyncFromCloud()" class="bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/40 text-xs font-bold" title="إعادة جلب البيانات">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+                <button onclick="openSyncModal()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="إعدادات الغرفة">
                     <i class="fa-solid fa-wifi"></i>
                 </button>
-                <button onclick="lockApp()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="قفل التطبيق">
+                <button onclick="lockApp()" class="bg-slate-800 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold" title="قفل">
                     <i class="fa-solid fa-lock"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Month Filter Selector & Excel Export & Lock Button -->
-        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+        <!-- Month Filter Selector & Controls -->
+        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
             <div class="flex items-center bg-slate-800/90 rounded-xl px-3 py-1.5 border border-slate-700 text-xs font-bold text-slate-300 w-full sm:w-auto">
                 <i class="fa-regular fa-calendar-check text-indigo-400 ml-2"></i>
                 <span class="ml-2 whitespace-nowrap">الشهر:</span>
@@ -155,12 +158,17 @@
                 </select>
             </div>
 
-            <button onclick="exportToExcel()" class="bg-emerald-600/90 hover:bg-emerald-600 active:scale-95 text-white text-xs font-extrabold py-2 px-3.5 rounded-xl border border-emerald-500/30 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
-                <i class="fa-solid fa-file-excel text-sm"></i>
-                <span>تصدير إكسيل (XLSX)</span>
+            <button onclick="manualSyncFromCloud()" class="hidden md:flex bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 p-2.5 rounded-xl border border-indigo-500/30 text-xs font-bold items-center gap-1.5 transition-all" title="تحديث وتنشيط البيانات من السحابة">
+                <i class="fa-solid fa-rotate text-indigo-400"></i>
+                <span>تحديث</span>
             </button>
 
-            <button onclick="openSyncModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="إعدادات كود الغرفة السحابية">
+            <button onclick="exportToExcel()" class="bg-emerald-600/90 hover:bg-emerald-600 active:scale-95 text-white text-xs font-extrabold py-2 px-3 rounded-xl border border-emerald-500/30 transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto">
+                <i class="fa-solid fa-file-excel text-sm"></i>
+                <span>تصدير (XLSX)</span>
+            </button>
+
+            <button onclick="openSyncModal()" class="hidden md:flex bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white p-2.5 rounded-xl border border-slate-700 text-xs font-bold items-center gap-1.5 transition-all" title="إعدادات الغرفة السحابية">
                 <i class="fa-solid fa-wifi text-indigo-400"></i>
                 <span>كود الغرفة</span>
             </button>
@@ -337,7 +345,7 @@
                     <div class="flex gap-2 pt-1">
                         <button type="submit" id="btnSubmitExpense" class="flex-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:opacity-90 text-white font-extrabold py-2.5 rounded-xl shadow-lg transition-all active:scale-98 text-xs flex items-center justify-center gap-2">
                             <i class="fa-solid fa-paper-plane text-sm"></i>
-                            <span id="btnSubmitText">حفظ وتزامن فوري 📲</span>
+                            <span id="btnSubmitText">حفظ وتزامن دائم 📲</span>
                         </button>
                         
                         <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs transition-all">
@@ -452,7 +460,7 @@
             <p class="text-xs text-slate-300 mb-3 leading-relaxed">
                 تأكد أن هذا الكود مكتوب <strong class="text-amber-400">بنفس الشفرة بالضبط</strong> على الموبايل الآخر (موبايل أحمد وموبايل أسماء) لربطهما معاً مباشرةً:
             </p>
-            <input type="text" id="roomCodeInput" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-center text-sm font-bold font-mono text-indigo-300 focus:outline-none focus:border-indigo-500 mb-4" placeholder="ahmed_asmaa_house_expenses">
+            <input type="text" id="roomCodeInput" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-center text-sm font-bold font-mono text-indigo-300 focus:outline-none focus:border-indigo-500 mb-4" placeholder="ahmed_asmaa_house_expenses_1610_sync_v2">
             
             <div class="flex gap-2">
                 <button onclick="saveRoomCode()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs">تطبيق وإعادة الاتصال 🔄</button>
@@ -470,12 +478,13 @@
     <script>
         // Global State Variables
         window.expenses = [];
+        window.lastUpdated = 0;
         window.currentBuyer = 'أحمد';
         window.pendingDeleteId = null;
         window.myDeviceId = 'dev_' + Math.random().toString(36).substring(2, 9);
         
         // Sync Room Configuration
-        const DEFAULT_ROOM = 'ahmed_asmaa_house_expenses_1610_sync';
+        const DEFAULT_ROOM = 'ahmed_asmaa_house_expenses_1610_sync_v2';
         window.currentRoom = localStorage.getItem('house_sync_room_code') || DEFAULT_ROOM;
 
         const PIN_KEY = 'house_expenses_pin_unlocked';
@@ -514,10 +523,14 @@
 
         let eventSource = null;
 
-        function initRealtimeSync() {
+        async function initRealtimeSync() {
+            // Step 1: Load local stored data
             loadLocalData();
 
-            // Sanitize room name for URL
+            // Step 2: Fetch Cloud state FIRST before starting SSE listener
+            await fetchCloudState();
+
+            // Step 3: Listen for live stream SSE messages
             const cleanRoom = encodeURIComponent(window.currentRoom.trim());
             const sseUrl = `https://ntfy.sh/${cleanRoom}/sse`;
 
@@ -530,8 +543,6 @@
 
                 eventSource.onopen = () => {
                     updateSyncStatus(true);
-                    // Broadcast local state to align both devices on connect
-                    broadcastFullState();
                 };
 
                 eventSource.onmessage = (e) => {
@@ -541,20 +552,13 @@
 
                         const data = JSON.parse(payload.message);
 
-                        // Ignore messages sent by this same device
                         if (data.sender === window.myDeviceId) return;
 
-                        if (data.type === 'FULL_SYNC' && Array.isArray(data.expenses)) {
-                            // Merge and update if external state is newer/different
-                            if (data.expenses.length >= 0) {
-                                window.expenses = data.expenses;
-                                saveLocalFallback();
-                                updateDashboard();
-                                showToast('تم استلام التحديثات أونلاين 📲');
-                            }
+                        if (data.type === 'FULL_SYNC' && Array.isArray(data.expenses) && typeof data.timestamp === 'number') {
+                            applyIncomingState(data.expenses, data.timestamp);
                         }
                     } catch (err) {
-                        // Ignore plain non-JSON test messages
+                        // Ignore non-JSON messages
                     }
                 };
 
@@ -568,6 +572,68 @@
             }
         }
 
+        async function fetchCloudState() {
+            const cleanRoom = encodeURIComponent(window.currentRoom.trim());
+            const jsonUrl = `https://ntfy.sh/${cleanRoom}/json?poll=1`;
+
+            try {
+                const response = await fetch(jsonUrl);
+                if (!response.ok) return;
+
+                const text = await response.text();
+                const lines = text.trim().split('\n');
+                
+                let latestCloudState = null;
+                let highestTimestamp = 0;
+
+                for (const line of lines) {
+                    if (!line) continue;
+                    try {
+                        const item = JSON.parse(line);
+                        if (item.message) {
+                            const data = JSON.parse(item.message);
+                            if (data.type === 'FULL_SYNC' && Array.isArray(data.expenses) && typeof data.timestamp === 'number') {
+                                if (data.timestamp > highestTimestamp) {
+                                    highestTimestamp = data.timestamp;
+                                    latestCloudState = data;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        // skip line if invalid
+                    }
+                }
+
+                if (latestCloudState && highestTimestamp > window.lastUpdated) {
+                    applyIncomingState(latestCloudState.expenses, highestTimestamp, true);
+                } else if (window.expenses.length > 0 && window.lastUpdated > highestTimestamp) {
+                    await broadcastFullState();
+                } else if ((!window.expenses || window.expenses.length === 0) && !latestCloudState) {
+                    initDefaultExpenses();
+                }
+            } catch (err) {
+                console.warn('Error polling cloud state:', err);
+            }
+        }
+
+        function applyIncomingState(incomingExpenses, incomingTimestamp, isInitial = false) {
+            if (incomingTimestamp > window.lastUpdated) {
+                window.expenses = incomingExpenses;
+                window.lastUpdated = incomingTimestamp;
+                saveLocalFallback();
+                updateDashboard();
+                if (!isInitial) {
+                    showToast('تم استقبال تحديث جديد أونلاين 📲');
+                }
+            }
+        }
+
+        async function manualSyncFromCloud() {
+            showToast('جاري تحديث البيانات من السحابة... 🔄');
+            await fetchCloudState();
+            showToast('تم التحديث بنجاح ✨');
+        }
+
         async function broadcastFullState() {
             const cleanRoom = encodeURIComponent(window.currentRoom.trim());
             const publishUrl = `https://ntfy.sh/${cleanRoom}`;
@@ -575,7 +641,7 @@
             const payload = {
                 sender: window.myDeviceId,
                 type: 'FULL_SYNC',
-                timestamp: Date.now(),
+                timestamp: window.lastUpdated || Date.now(),
                 expenses: window.expenses
             };
 
@@ -591,27 +657,41 @@
         }
 
         function loadLocalData() {
-            const saved = localStorage.getItem('house_expenses_local_data');
-            if (saved) {
+            const savedData = localStorage.getItem('house_expenses_local_data');
+            const savedTime = localStorage.getItem('house_expenses_last_updated');
+
+            if (savedData) {
                 try {
-                    window.expenses = JSON.parse(saved);
-                } catch(e) { window.expenses = []; }
-            }
-            if (!window.expenses || window.expenses.length === 0) {
-                const today = new Date().toISOString().split('T')[0];
-                window.expenses = [
-                    { id: '1', date: today, month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم كاندوز', buyer: 'أحمد', amount: 750, createdAt: 1000 },
-                    { id: '2', date: today, month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك', buyer: 'أسماء', amount: 380, createdAt: 2000 },
-                    { id: '3', date: today, month: 'سبتمبر', category: 'خضروات', name: 'خضار وفاكهة للأسبوع', buyer: 'أسماء', amount: 250, createdAt: 3000 },
-                    { id: '4', date: today, month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ولبتون', buyer: 'أحمد', amount: 310, createdAt: 4000 }
-                ];
-                saveLocalFallback();
+                    window.expenses = JSON.parse(savedData);
+                    window.lastUpdated = parseInt(savedTime, 10) || 0;
+                } catch (e) {
+                    window.expenses = [];
+                    window.lastUpdated = 0;
+                }
+            } else {
+                window.expenses = [];
+                window.lastUpdated = 0;
             }
             updateDashboard();
         }
 
+        function initDefaultExpenses() {
+            const today = new Date().toISOString().split('T')[0];
+            window.expenses = [
+                { id: '1', date: today, month: 'سبتمبر', category: 'لحوم', name: '2 كيلو لحم كاندوز', buyer: 'أحمد', amount: 750, createdAt: 1000 },
+                { id: '2', date: today, month: 'سبتمبر', category: 'منظفات', name: 'مسحوق غسيل أوتوماتيك', buyer: 'أسماء', amount: 380, createdAt: 2000 },
+                { id: '3', date: today, month: 'سبتمبر', category: 'خضروات', name: 'خضار وفاكهة للأسبوع', buyer: 'أسماء', amount: 250, createdAt: 3000 },
+                { id: '4', date: today, month: 'سبتمبر', category: 'مستلزمات للفطار', name: 'بيض وجبن ولبتون', buyer: 'أحمد', amount: 310, createdAt: 4000 }
+            ];
+            window.lastUpdated = Date.now();
+            saveLocalFallback();
+            updateDashboard();
+            broadcastFullState();
+        }
+
         function saveLocalFallback() {
             localStorage.setItem('house_expenses_local_data', JSON.stringify(window.expenses));
+            localStorage.setItem('house_expenses_last_updated', window.lastUpdated.toString());
         }
 
         function updateSyncStatus(isOnline) {
@@ -620,11 +700,11 @@
             if (isOnline) {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 text.className = "text-emerald-400 font-bold";
-                text.textContent = "🟢 متصل بالسحابة المباشرة - تزامن لحظي بين أحمد وأسماء";
+                text.textContent = "🟢 متصل بالسحابة (تزامن لحظي محفوظ)";
             } else {
                 dot.className = "inline-block w-2.5 h-2.5 rounded-full bg-amber-500";
                 text.className = "text-amber-400 font-bold";
-                text.textContent = "🟡 وضع التخزين المحلي (جاري المتابعة أونلاين)";
+                text.textContent = "🟡 وضع التخزين المحلي (جاري إعادة الاتصال)";
             }
         }
 
@@ -652,7 +732,6 @@
             };
 
             if (docId) {
-                // EDIT EXISTING
                 const idx = window.expenses.findIndex(x => x.id === docId);
                 if (idx !== -1) {
                     window.expenses[idx] = { ...window.expenses[idx], ...itemPayload };
@@ -660,7 +739,6 @@
                 cancelEditMode();
                 showToast('تم تحديث البيانات أونلاين 🔄');
             } else {
-                // ADD NEW
                 itemPayload.createdAt = Date.now();
                 window.expenses.unshift(itemPayload);
                 document.getElementById('itemName').value = '';
@@ -668,6 +746,7 @@
                 showToast('تمت الإضافة وتحديث الموبايل الآخر فوراً 📲');
             }
 
+            window.lastUpdated = Date.now();
             saveLocalFallback();
             updateDashboard();
             await broadcastFullState();
@@ -700,7 +779,7 @@
             document.getElementById('itemAmount').value = '';
             
             document.getElementById('formHeaderTitle').querySelector('span').textContent = 'تسجيل مشتريات جديدة';
-            document.getElementById('btnSubmitText').textContent = 'حفظ وتزامن فوري 📲';
+            document.getElementById('btnSubmitText').textContent = 'حفظ وتزامن دائم 📲';
             document.getElementById('editingBadge').classList.add('hidden');
             document.getElementById('btnCancelEdit').classList.add('hidden');
         };
@@ -724,6 +803,7 @@
             closeDeleteModal();
 
             window.expenses = window.expenses.filter(x => x.id !== id);
+            window.lastUpdated = Date.now();
             saveLocalFallback();
             updateDashboard();
             
