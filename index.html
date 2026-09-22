@@ -305,10 +305,36 @@
                 <form id="addExpenseForm" onsubmit="handleFormSubmit(event)" class="space-y-3">
                     <input type="hidden" id="editingDocId" value="">
 
-                    <!-- Item Name -->
+                    <!-- Item Name (الغرض) -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1">اسم الغرض / المشتريات *</label>
-                        <input type="text" id="itemName" required placeholder="مثلاً: بومبرز لعمر، ربع بن، نسكافيه، لحم..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+                        <label class="block text-xs font-bold text-slate-300 mb-1">الغرض (اسم المشتريات) *</label>
+                        <input type="text" id="itemName" required placeholder="مثلاً: بطاطس، خيار، جبنة رومي، بن..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+                    </div>
+
+                    <!-- Weight/Quantity & Unit Dropdown -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">الوزن / الكمية</label>
+                            <input type="text" id="itemWeight" placeholder="مثلاً: 2 ، ربع ، 1.5..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition-all placeholder:text-slate-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">الوحدة</label>
+                            <select id="itemUnit" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                                <option value="كيلو">كيلو</option>
+                                <option value="جرام">جرام</option>
+                                <option value="لتر">لتر</option>
+                                <option value="مليلتر">مليلتر</option>
+                                <option value="قطعة">قطعة / عدد</option>
+                                <option value="علبة">علبة</option>
+                                <option value="كيس">كيس</option>
+                                <option value="زجاجة">زجاجة</option>
+                                <option value="باكيت">باكيت</option>
+                                <option value="طبق">طبق</option>
+                                <option value="كرتونة">كرتونة</option>
+                                <option value="عبوة">عبوة</option>
+                                <option value="بدون">بدون وحدة</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Amount & Date -->
@@ -711,6 +737,21 @@
             return DEFAULT_FIREBASE_CONFIG;
         }
 
+        function parseExpensesData(data) {
+            if (!data) return [];
+            let list = [];
+            if (Array.isArray(data.expenses)) {
+                list = data.expenses;
+            } else if (data && data.expenses && typeof data.expenses === 'object') {
+                list = Object.values(data.expenses);
+            } else if (Array.isArray(data)) {
+                list = data;
+            } else if (typeof data === 'object') {
+                list = Object.values(data);
+            }
+            return list.filter(item => item && typeof item === 'object' && item.id);
+        }
+
         function initFirebase() {
             const config = getSavedFirebaseConfig();
             if (!config || !config.apiKey || !config.databaseURL) {
@@ -728,14 +769,7 @@
                 // Realtime sync listener!
                 window.dbRef.on('value', (snapshot) => {
                     const data = snapshot.val();
-                    if (data && Array.isArray(data.expenses)) {
-                        window.expenses = data.expenses;
-                    } else if (data && typeof data === 'object') {
-                        // In case saved as object map
-                        window.expenses = Object.values(data.expenses || {});
-                    } else {
-                        window.expenses = [];
-                    }
+                    window.expenses = parseExpensesData(data);
                     saveLocalFallback();
                     updateDashboard();
                     updateSyncStatus(true, '🟢 متصل لحظياً بـ Firebase (تزامن فوري)');
@@ -827,6 +861,8 @@
 
             const docId = document.getElementById('editingDocId').value;
             const name = document.getElementById('itemName').value.trim();
+            const weight = document.getElementById('itemWeight').value.trim();
+            const unit = document.getElementById('itemUnit').value;
             const amount = parseFloat(document.getElementById('itemAmount').value);
             const date = document.getElementById('itemDate').value;
             const category = document.getElementById('itemCategory').value;
@@ -837,6 +873,8 @@
             const itemPayload = {
                 id: docId || 'exp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
                 name,
+                weight,
+                unit,
                 amount,
                 date,
                 category,
@@ -856,7 +894,17 @@
                 itemPayload.createdAt = Date.now();
                 window.expenses.unshift(itemPayload);
                 document.getElementById('itemName').value = '';
+                document.getElementById('itemWeight').value = '';
                 document.getElementById('itemAmount').value = '';
+
+                // Switch filter automatically to new item's month if it was different
+                const filterSelect = document.getElementById('filterMonthSelect');
+                if (filterSelect.value !== 'ALL' && filterSelect.value !== month) {
+                    filterSelect.value = month;
+                    window.selectedMonth = month;
+                    localStorage.setItem('house_expenses_selected_month', month);
+                }
+
                 showToast('تمت الإضافة والتزامن فوراً 📲');
             }
 
@@ -871,7 +919,9 @@
             if (!item) return;
 
             document.getElementById('editingDocId').value = item.id;
-            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemName').value = item.name || '';
+            document.getElementById('itemWeight').value = item.weight || '';
+            document.getElementById('itemUnit').value = item.unit || 'كيلو';
             document.getElementById('itemAmount').value = item.amount;
             document.getElementById('itemDate').value = item.date;
             document.getElementById('itemCategory').value = item.category;
@@ -891,6 +941,8 @@
             triggerHaptic();
             document.getElementById('editingDocId').value = '';
             document.getElementById('itemName').value = '';
+            document.getElementById('itemWeight').value = '';
+            document.getElementById('itemUnit').value = 'كيلو';
             document.getElementById('itemAmount').value = '';
             
             document.getElementById('formHeaderTitle').querySelector('span').textContent = 'تسجيل مشتريات جديدة';
@@ -997,11 +1049,12 @@
 
         function getFilteredData() {
             const selectedMonth = document.getElementById('filterMonthSelect').value;
-            const data = window.expenses || [];
-            if (selectedMonth === 'ALL') {
-                return data;
+            let data = window.expenses || [];
+            if (selectedMonth !== 'ALL') {
+                data = data.filter(x => x.month === selectedMonth);
             }
-            return data.filter(x => x.month === selectedMonth);
+            // Sort items so newest entries always appear on top
+            return data.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
         }
 
         function updateDashboard() {
@@ -1154,9 +1207,7 @@
                             position: 'bottom',
                             labels: {
                                 color: '#cbd5e1',
-                                font: { family: 'Cairo', size: 10, weight: 'bold' },
-                                boxWidth: 10,
-                                padding: 8
+                                font: { family: 'Cairo', size: 10 }
                             }
                         }
                     }
@@ -1164,10 +1215,21 @@
             });
         }
 
+        function formatItemDisplayName(item) {
+            const parts = [];
+            if (item.weight) parts.push(item.weight);
+            if (item.unit && item.unit !== 'بدون') parts.push(item.unit);
+            if (item.name) parts.push(item.name);
+            return parts.join(' ') || item.name || '';
+        }
+
         function renderTable() {
             const tbody = document.getElementById('transactionsTableBody');
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
-            const filtered = getFilteredData().filter(item => !searchVal || item.name.toLowerCase().includes(searchVal));
+            const filtered = getFilteredData().filter(item => {
+                const displayName = formatItemDisplayName(item).toLowerCase();
+                return !searchVal || displayName.includes(searchVal);
+            });
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
@@ -1193,7 +1255,7 @@
                                 <i class="fa-solid ${catObj.icon}"></i> ${item.category}
                             </span>
                         </td>
-                        <td class="p-2.5 font-extrabold text-white">${escapeHtml(item.name)}</td>
+                        <td class="p-2.5 font-extrabold text-white">${escapeHtml(formatItemDisplayName(item))}</td>
                         <td class="p-2.5">${buyerBadge}</td>
                         <td class="p-2.5 font-black text-slate-100">${item.amount} <span class="text-[10px] text-slate-400">ج.م</span></td>
                         <td class="p-2.5 text-center whitespace-nowrap">
@@ -1218,7 +1280,7 @@
                 "التاريخ": x.date,
                 "الشهر": x.month,
                 "القسم": x.category,
-                "اسم السلعة / المشتريات": x.name,
+                "اسم السلعة / المشتريات": formatItemDisplayName(x),
                 "المشتري (من دفع؟)": x.buyer,
                 "المبلغ (ج.م)": x.amount
             }));
