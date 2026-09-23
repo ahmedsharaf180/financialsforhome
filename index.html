@@ -387,7 +387,7 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-300 mb-1">الشهر *</label>
-                            <select id="itemMonth" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <select id="itemMonth" onchange="handleFormMonthChange()" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-indigo-500">
                                 <option value="يناير">يناير</option>
                                 <option value="فبراير">فبراير</option>
                                 <option value="مارس">مارس</option>
@@ -813,11 +813,17 @@
             initFirebase();
         };
 
+        window.handleFormMonthChange = function() {
+            const val = document.getElementById('itemMonth').value;
+            localStorage.setItem('house_expenses_form_month', val);
+        };
+
         async function syncToFirebase() {
             if (window.dbRef) {
                 try {
+                    const cleanExpenses = JSON.parse(JSON.stringify(window.expenses));
                     await window.dbRef.set({
-                        expenses: window.expenses,
+                        expenses: cleanExpenses,
                         updatedAt: Date.now()
                     });
                 } catch (err) {
@@ -870,6 +876,17 @@
 
             if (!name || isNaN(amount) || amount <= 0) return;
 
+            // Save the chosen form month so it persists on reload
+            localStorage.setItem('house_expenses_form_month', month);
+
+            let existingCreatedAt = Date.now();
+            if (docId) {
+                const existing = window.expenses.find(x => x.id === docId);
+                if (existing && existing.createdAt) {
+                    existingCreatedAt = existing.createdAt;
+                }
+            }
+
             const itemPayload = {
                 id: docId || 'exp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
                 name,
@@ -880,7 +897,7 @@
                 category,
                 month,
                 buyer: window.currentBuyer,
-                createdAt: docId ? undefined : Date.now()
+                createdAt: existingCreatedAt
             };
 
             if (docId) {
@@ -891,7 +908,6 @@
                 cancelEditMode();
                 showToast('تم تحديث البيانات 🔄');
             } else {
-                itemPayload.createdAt = Date.now();
                 window.expenses.unshift(itemPayload);
                 document.getElementById('itemName').value = '';
                 document.getElementById('itemWeight').value = '';
@@ -992,7 +1008,9 @@
             const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             const currentMonthName = monthNames[new Date().getMonth()];
 
-            document.getElementById('itemMonth').value = currentMonthName;
+            // Load saved form month or default to current month
+            const savedFormMonth = localStorage.getItem('house_expenses_form_month');
+            document.getElementById('itemMonth').value = savedFormMonth || currentMonthName;
 
             const savedFilterMonth = localStorage.getItem('house_expenses_selected_month');
             window.selectedMonth = savedFilterMonth || currentMonthName;
